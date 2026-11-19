@@ -5,7 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 const int kSchemaVersion = 1;
 
-enum RecordSource { voice, text, manual }
+/// How a record was created: by voice, typed command, manual form, or receipt scan.
+enum RecordSource { voice, text, manual, scan }
 
 enum ReminderRepeat { none, daily, weekly }
 

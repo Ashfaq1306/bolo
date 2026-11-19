@@ -386,4 +386,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enable => 'Enable';
+
+  @override
+  String speakExpense(String amount, String category) {
+    return '$amount taka for $category. Shall I save it?';
+  }
+
+  @override
+  String speakReminder(String when, String title) {
+    return 'I\'ll remind you $when: $title. Okay?';
+  }
+
+  @override
+  String speakTask(String title) {
+    return 'New task: $title. Shall I save it?';
+  }
+
+  @override
+  String speakReceivable(String person, String amount) {
+    return '$person will give you $amount taka. Please confirm.';
+  }
+
+  @override
+  String speakPayable(String person, String amount) {
+    return 'You will give $person $amount taka. Please confirm.';
+  }
+
+  @override
+  String speakSettle(String person) {
+    return 'Which of $person\'s entries was settled?';
+  }
+
+  @override
+  String get speakUnknown =>
+      'Sorry, I didn\'t understand. Please choose a type.';
+
+  @override
+  String get speakSaved => 'Done, saved!';
+
+  @override
+  String get voiceReplies => 'Voice replies (Bolo talks back)';
+
+  @override
+  String get voiceUnavailable =>
+      'No voice for this language is installed on this phone. Install it from Settings → Text-to-speech.';
+
+  @override
+  String get pickContact => 'Choose from contacts';
+
+  @override
+  String get addToCalendar => 'Also add to phone calendar';
+
+  @override
+  String get scanReceipt => 'Scan receipt';
+
+  @override
+  String get scanNoText =>
+      'Couldn\'t read any text. Try again with better light, or enter it by hand.';
+
+  @override
+  String get scanFailed =>
+      'Scanning didn\'t work on this phone. Please enter it by hand.';
+
+  @override
+  String get scanHint =>
+      'Read on your phone; the photo is deleted right away. Please check the amount.';
+
+  @override
+  String get devicePowers => 'Device features';
+
+  @override
+  String get devicePowersBody =>
+      'Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.';
 }

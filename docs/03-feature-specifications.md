@@ -138,6 +138,68 @@ Every field on the card is editable inline: title, amount, person, date, time, c
 - Export: a JSON file of all of the user's records, generated on the device and saved via the share sheet. (Post-MVP.)
 - Delete: a callable function `deleteMyData` recursively deletes `users/{uid}` and then deletes the Auth user. (Before public launch.)
 
+## F14: Bolo's face (character)
+
+- An animated face is painted over the GPU orb: glossy eyes with catch-lights, eyebrows, a small nose, a mouth, and cheeks. Code: `features/voice/orb_face.dart`.
+- **Expressions:**
+
+  | Expression | Shown when | Look |
+  |---|---|---|
+  | idle | waiting | gentle smile, eyes wander |
+  | listening | microphone is on | wide eyes, raised brows, mouth opens with your voice level |
+  | thinking | AI is working / scanning | eyes up and to the side, one brow raised |
+  | speaking | Bolo is talking | mouth moves in a talking rhythm |
+  | happy | after saving | "^ ^" eyes, big smile, blush (2 s) |
+  | confused | not understood / error | tilted brows, frown (2 s) |
+
+- Blinks every 2.5–5.5 s. Eyes follow the user's finger anywhere on the home screen.
+- The face shifts slightly toward where it looks, so it seems to turn on the sphere.
+- Reduce motion shows a static face with no blinking or tracking.
+
+## F15: Voice replies (Bolo talks back)
+
+- Uses the phone's own text-to-speech (`flutter_tts`). No permission is needed, and no audio leaves the phone through Bolo.
+- When a card opens, Bolo says a one-sentence summary (and asks the AI's clarifying question first). After saving it says "সেভ করেছি!" ("Saved!"). Code: `features/command/spoken_summary.dart`.
+- The voice is chosen per language: Bangla uses `bn-BD`, then `bn-IN`. If the phone has no voice for that language, Bolo stays silent rather than reading Bangla with an English voice, and Settings explains how to install one.
+- It can be turned off in Settings. Tapping the orb interrupts speech.
+
+## F16: Contacts (person picker)
+
+- The person field on receivable/payable cards has a contacts button that opens the **system contact picker** (`FlutterContacts.native.showPicker()`).
+- **No READ_CONTACTS permission:** Android hands Bolo only the one contact the user picks. Only the display name is used, and it is never sent to the AI.
+
+## F17: Add to phone calendar
+
+- Reminder and task cards have the toggle "ফোনের ক্যালেন্ডারেও যোগ করুন" ("also add to phone calendar"). After saving, Bolo opens the phone's calendar app with the event prefilled (`add_2_calendar`), and the user taps Save there.
+- **No calendar permission:** Bolo never reads the calendar.
+
+## F18: Receipt scan
+
+- "রসিদ স্ক্যান" ("scan receipt") on Home and Money opens the camera app, then reads the photo with Google ML Kit text recognition **on the device**, then shows an expense card (confidence 0.6, so the user is asked to check).
+- No CAMERA permission is needed (the system camera app takes the photo). **The photo is deleted immediately** after reading.
+- Parser (`features/receipt/receipt_parser.dart`, unit-tested):
+  1. Prefer the number on a "Grand total / Net payable / সর্বমোট" line.
+  2. Otherwise the number on a "Total / মোট" line (not "Sub total").
+  3. Otherwise the largest plausible amount, ignoring phone and invoice numbers.
+
+  The merchant is taken from the top lines, and the category is guessed from keywords.
+- **Limitation:** ML Kit's on-device recognizer does not support Bangla script. Totals printed in Latin digits work; Bangla-only receipts need manual entry. A future option is sending the photo to a vision AI, which is better for Bangla but costs money and sends the image off the phone, so it needs the user's consent.
+
+## Device access policy
+
+Bolo asks for **purpose-specific** access only, at the moment of use, and prefers system pickers that need no permission:
+
+| Capability | Permission | Status |
+|---|---|---|
+| Microphone (voice input) | `RECORD_AUDIO`, asked on first tap | ✅ |
+| Notifications / exact alarms | `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM` | ✅ |
+| Voice replies | none | ✅ |
+| Contacts | none (system picker) | ✅ |
+| Calendar | none (calendar app intent) | ✅ |
+| Camera (receipts) | none (camera app intent) | ✅ |
+| **SMS (bKash/Nagad transaction SMS)** | `READ_SMS` is a Google Play *restricted* permission | ❌ Not added. Needs a separate Play policy review before any work |
+| Call logs, background location, "all access" | restricted / no product purpose | ❌ Will not be added |
+
 ---
 
 ## Ambiguous dates and times

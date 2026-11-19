@@ -817,6 +817,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable'**
   String get enable;
+
+  /// No description provided for @speakExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} taka for {category}. Shall I save it?'**
+  String speakExpense(String amount, String category);
+
+  /// No description provided for @speakReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll remind you {when}: {title}. Okay?'**
+  String speakReminder(String when, String title);
+
+  /// No description provided for @speakTask.
+  ///
+  /// In en, this message translates to:
+  /// **'New task: {title}. Shall I save it?'**
+  String speakTask(String title);
+
+  /// No description provided for @speakReceivable.
+  ///
+  /// In en, this message translates to:
+  /// **'{person} will give you {amount} taka. Please confirm.'**
+  String speakReceivable(String person, String amount);
+
+  /// No description provided for @speakPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'You will give {person} {amount} taka. Please confirm.'**
+  String speakPayable(String person, String amount);
+
+  /// No description provided for @speakSettle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of {person}\'s entries was settled?'**
+  String speakSettle(String person);
+
+  /// No description provided for @speakUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, I didn\'t understand. Please choose a type.'**
+  String get speakUnknown;
+
+  /// No description provided for @speakSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Done, saved!'**
+  String get speakSaved;
+
+  /// No description provided for @voiceReplies.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice replies (Bolo talks back)'**
+  String get voiceReplies;
+
+  /// No description provided for @voiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No voice for this language is installed on this phone. Install it from Settings → Text-to-speech.'**
+  String get voiceUnavailable;
+
+  /// No description provided for @pickContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from contacts'**
+  String get pickContact;
+
+  /// No description provided for @addToCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Also add to phone calendar'**
+  String get addToCalendar;
+
+  /// No description provided for @scanReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan receipt'**
+  String get scanReceipt;
+
+  /// No description provided for @scanNoText.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read any text. Try again with better light, or enter it by hand.'**
+  String get scanNoText;
+
+  /// No description provided for @scanFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning didn\'t work on this phone. Please enter it by hand.'**
+  String get scanFailed;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Read on your phone; the photo is deleted right away. Please check the amount.'**
+  String get scanHint;
+
+  /// No description provided for @devicePowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Device features'**
+  String get devicePowers;
+
+  /// No description provided for @devicePowersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.'**
+  String get devicePowersBody;
 }
 
 class _AppLocalizationsDelegate

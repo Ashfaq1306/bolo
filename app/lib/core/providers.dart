@@ -13,7 +13,9 @@ import '../features/records/models.dart';
 import '../features/records/records_repository.dart';
 import '../features/reminders/reminder_scheduler.dart';
 import '../features/summary/daily_summary.dart';
+import '../features/receipt/receipt_scanner.dart';
 import '../features/voice/speech_service.dart';
+import '../features/voice/voice_reply.dart';
 import 'dhaka_time.dart';
 
 /// Global dependency graph. Each provider can be overridden in tests with a
@@ -64,6 +66,11 @@ final commandSaverProvider = Provider<CommandSaver?>((ref) {
 });
 
 final inboxStoreProvider = Provider<InboxStore>((ref) => InboxStore(ref.watch(sharedPreferencesProvider)));
+
+/// Bolo's voice (phone text-to-speech).
+final voiceReplyProvider = Provider<VoiceReplyService>((ref) => DeviceVoiceReplyService());
+
+final receiptScannerProvider = Provider<ReceiptScanner>((ref) => ReceiptScanner());
 
 // ---- Live data streams --------------------------------------------------
 
@@ -135,5 +142,19 @@ class SummaryHourNotifier extends Notifier<int> {
     await ref.read(sharedPreferencesProvider).setInt(_key, hour);
   }
 }
+
+class VoiceRepliesNotifier extends Notifier<bool> {
+  static const _key = 'settings.voiceReplies';
+  @override
+  bool build() => ref.watch(sharedPreferencesProvider).getBool(_key) ?? true;
+
+  Future<void> set(bool on) async {
+    state = on;
+    await ref.read(sharedPreferencesProvider).setBool(_key, on);
+    if (!on) await ref.read(voiceReplyProvider).stop();
+  }
+}
+
+final voiceRepliesProvider = NotifierProvider<VoiceRepliesNotifier, bool>(VoiceRepliesNotifier.new);
 
 final summaryHourProvider = NotifierProvider<SummaryHourNotifier, int>(SummaryHourNotifier.new);

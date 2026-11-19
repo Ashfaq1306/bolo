@@ -15,7 +15,7 @@ service cloud.firestore {
     function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
     function optTs(v) { return v == null || v is timestamp; }
     function money(v) { return v is int && v > 0 && v <= 100000000000; }
-    function source() { return data().source in ['voice', 'text', 'manual']; }
+    function source() { return data().source in ['voice', 'text', 'manual', 'scan']; }
 
     // createdAt is set once; updatedAt must be the server time on each write.
     function stamps() {

@@ -62,7 +62,7 @@
 ### Privacy by design
 - **No audio storage.** Bolo never records audio files; it only consumes the recognizer's text result. On Android, the system recognizer (usually Google's) may process audio on-device or in the cloud depending on the device and settings. This must be disclosed.
 - **Transcripts are off by default** (`storeTranscripts: false`).
-- **Data minimisation:** no contacts, location, or SMS permissions in the MVP.
+- **Data minimisation:** no contacts, calendar, camera, location, or SMS *permissions*. Contacts, calendar, and camera features use system pickers and intents, so Bolo only receives what the user explicitly hands over (one contact name, one photo, which is deleted after on-device reading). See the device access policy in [03](03-feature-specifications.md#device-access-policy).
 - **User rights:** delete-all-data (function) and export (JSON) before public launch.
 - **Logs:** functions log only the UID hash, intent, latency, and token counts, never the user's text.
 

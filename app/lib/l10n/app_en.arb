@@ -57,7 +57,13 @@
   "financialNote": "Money record: nothing is saved until you tap Confirm.",
   "largeAmountTitle": "Large amount",
   "largeAmountBody": "{amount}: are you sure this is correct?",
-  "@largeAmountBody": { "placeholders": { "amount": { "type": "String" } } },
+  "@largeAmountBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "ambiguityAmPm": "Morning or evening? Please check the time.",
   "ambiguityRelativeDay": "Which day did you mean? Please check.",
   "ambiguityRelativeWeek": "This week or next week? Please check.",
@@ -97,7 +103,16 @@
   "ledgerTitle": "Owed & owing",
   "settle": "Mark settled",
   "settleConfirm": "Mark {person} · {amount} as settled?",
-  "@settleConfirm": { "placeholders": { "person": { "type": "String" }, "amount": { "type": "String" } } },
+  "@settleConfirm": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "noExpenses": "No spending recorded this month",
   "noLedger": "No one owes anyone. Nice!",
   "settingsTitle": "Settings",
@@ -111,7 +126,13 @@
   "email": "Email",
   "password": "Password (min 6 characters)",
   "accountSecured": "Secured: {email}",
-  "@accountSecured": { "placeholders": { "email": { "type": "String" } } },
+  "@accountSecured": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "privacy": "Privacy",
   "privacyBody": "Bolo never records audio. The text of what you say is sent to an AI service only to understand it, and is not stored. Your records are visible only to you.",
   "inbox": "Inbox",
@@ -121,7 +142,88 @@
   "retry": "Retry",
   "summaryNotificationTitle": "Today's summary",
   "summaryNotificationBody": "{tasks} tasks left · spent {spent}",
-  "@summaryNotificationBody": { "placeholders": { "tasks": { "type": "String" }, "spent": { "type": "String" } } },
+  "@summaryNotificationBody": {
+    "placeholders": {
+      "tasks": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      }
+    }
+  },
   "notificationsOff": "Turn on notifications so reminders can reach you.",
-  "enable": "Enable"
+  "enable": "Enable",
+  "speakExpense": "{amount} taka for {category}. Shall I save it?",
+  "@speakExpense": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "speakReminder": "I'll remind you {when}: {title}. Okay?",
+  "@speakReminder": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "speakTask": "New task: {title}. Shall I save it?",
+  "@speakTask": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "speakReceivable": "{person} will give you {amount} taka. Please confirm.",
+  "@speakReceivable": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "speakPayable": "You will give {person} {amount} taka. Please confirm.",
+  "@speakPayable": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "speakSettle": "Which of {person}'s entries was settled?",
+  "@speakSettle": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "speakUnknown": "Sorry, I didn't understand. Please choose a type.",
+  "speakSaved": "Done, saved!",
+  "voiceReplies": "Voice replies (Bolo talks back)",
+  "voiceUnavailable": "No voice for this language is installed on this phone. Install it from Settings → Text-to-speech.",
+  "pickContact": "Choose from contacts",
+  "addToCalendar": "Also add to phone calendar",
+  "scanReceipt": "Scan receipt",
+  "scanNoText": "Couldn't read any text. Try again with better light, or enter it by hand.",
+  "scanFailed": "Scanning didn't work on this phone. Please enter it by hand.",
+  "scanHint": "Read on your phone; the photo is deleted right away. Please check the amount.",
+  "devicePowers": "Device features",
+  "devicePowersBody": "Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access."
 }

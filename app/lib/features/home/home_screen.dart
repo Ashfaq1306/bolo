@@ -12,11 +12,35 @@ import '../../l10n/app_localizations.dart';
 import '../command/capture_controller.dart';
 import '../command/confirmation_sheet.dart';
 import '../command/parsed_command.dart';
+import '../command/spoken_summary.dart';
+import '../receipt/scan_flow.dart';
+import '../voice/face_mood.dart';
+import '../voice/orb_face.dart';
 import '../records/models.dart';
 import '../voice/voice_orb.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  /// Where the user's finger is (Bolo's eyes follow it).
+  final _pointer = ValueNotifier<Offset?>(null);
+
+  @override
+  void dispose() {
+    _pointer.dispose();
+    super.dispose();
+  }
+
+  /// Bolo says the proposal out loud (if voice replies are on).
+  void _speak(String text) {
+    if (!ref.read(voiceRepliesProvider)) return;
+    ref.read(voiceReplyProvider).speak(text, languageCode: ref.read(localeProvider).languageCode);
+  }
 
   String _message(AppLocalizations l, CaptureMessage m) => switch (m) {
         CaptureMessage.none => '',
@@ -29,56 +53,41 @@ class HomeScreen extends ConsumerWidget {
         CaptureMessage.notSignedIn => l.notSignedIn,
       };
 
-  Future<void> _typeCommand(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final controller = TextEditingController();
+  Future<void> _typeCommand(BuildContext context) async {
     final text = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (c) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(c).bottom),
-        child: Row(children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              autofocus: true,
-              maxLength: 500,
-              minLines: 1,
-              maxLines: 4,
-              // Enter sends (instead of adding a new line).
-              textInputAction: TextInputAction.send,
-              decoration: InputDecoration(hintText: l.inputHint),
-              onSubmitted: (v) => Navigator.pop(c, v),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton.filled(
-            tooltip: l.send,
-            onPressed: () => Navigator.pop(c, controller.text),
-            icon: const Icon(Icons.send_rounded),
-          ),
-        ]),
-      ),
+      builder: (_) => const _TypeCommandSheet(),
     );
-    controller.dispose();
     if (text != null && text.trim().isNotEmpty) {
       await ref.read(captureControllerProvider.notifier).submit(text, source: RecordSource.text);
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final capture = ref.watch(captureControllerProvider);
     final now = ref.watch(clockProvider)();
+    final mood = ref.watch(faceMoodProvider);
 
-    // Open the confirmation card once per new proposal.
+    // Open the confirmation card once per new proposal, and say it out loud.
     ref.listen(captureControllerProvider, (prev, next) {
       if (next.proposal != null && next.proposalSerial != prev?.proposalSerial) {
-        if (next.proposal!.intent == CommandIntent.querySummary) return; // summary is on this screen
-        showConfirmationSheet(context, ref, next.proposal!);
+        final proposal = next.proposal!;
+        if (proposal.intent == CommandIntent.querySummary) {
+          ref.read(faceMoodProvider.notifier).flash(FaceExpression.happy);
+          return; // the summary is right here on this screen
+        }
+        if (proposal.intent == CommandIntent.unknown) {
+          ref.read(faceMoodProvider.notifier).flash(FaceExpression.confused);
+        }
+        _speak(spokenSummary(proposal, l, lang));
+        showConfirmationSheet(context, ref, proposal);
+      } else if (next.message != CaptureMessage.none && next.message != prev?.message) {
+        ref.read(faceMoodProvider.notifier).flash(FaceExpression.confused);
       }
     });
 
@@ -88,10 +97,10 @@ class HomeScreen extends ConsumerWidget {
       'evening' => l.greetingEvening,
       _ => l.greetingNight,
     };
-    final mode = switch (capture.phase) {
-      CapturePhase.idle => OrbMode.idle,
-      CapturePhase.listening => OrbMode.listening,
-      CapturePhase.thinking => OrbMode.thinking,
+    final phaseFace = switch (capture.phase) {
+      CapturePhase.idle => FaceExpression.idle,
+      CapturePhase.listening => FaceExpression.listening,
+      CapturePhase.thinking => FaceExpression.thinking,
     };
     final status = switch (capture.phase) {
       CapturePhase.listening => capture.transcript.isEmpty ? l.listening : capture.transcript,
@@ -100,7 +109,14 @@ class HomeScreen extends ConsumerWidget {
     };
     final speechLocale = ref.watch(speechLocaleProvider);
 
-    return Stack(children: [
+    // Track the finger anywhere on the screen so Bolo can look at it.
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (e) => _pointer.value = e.position,
+      onPointerMove: (e) => _pointer.value = e.position,
+      onPointerUp: (_) => _pointer.value = null,
+      onPointerCancel: (_) => _pointer.value = null,
+      child: Stack(children: [
       const Positioned.fill(child: _StarField()),
       SafeArea(
         child: CustomScrollView(slivers: [
@@ -130,12 +146,20 @@ class HomeScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: Column(children: [
               const SizedBox(height: 8),
-              VoiceOrb(
-                mode: mode,
+              ValueListenableBuilder<bool>(
+                valueListenable: ref.watch(voiceReplyProvider).speaking,
+                builder: (context, speaking, _) => VoiceOrb(
+                // Priority: a short emotion (happy/confused) > speaking > state.
+                expression: mood ?? (speaking ? FaceExpression.speaking : phaseFace),
+                pointer: _pointer,
                 level: capture.level,
                 semanticLabel: l.orbLabel,
                 size: math.min(MediaQuery.sizeOf(context).width * 0.72, 300),
-                onTap: () => ref.read(captureControllerProvider.notifier).toggleListening(),
+                onTap: () {
+                  ref.read(voiceReplyProvider).stop(); // tapping interrupts Bolo's speech
+                  ref.read(captureControllerProvider.notifier).toggleListening();
+                },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -153,18 +177,74 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: capture.phase == CapturePhase.idle ? () => _typeCommand(context, ref) : null,
-                icon: const Icon(Icons.keyboard_rounded),
-                label: Text(l.typeInstead),
-              ),
+              Wrap(alignment: WrapAlignment.center, spacing: 8, children: [
+                TextButton.icon(
+                  onPressed: capture.phase == CapturePhase.idle ? () => _typeCommand(context) : null,
+                  icon: const Icon(Icons.keyboard_rounded),
+                  label: Text(l.typeInstead),
+                ),
+                TextButton.icon(
+                  onPressed: capture.phase == CapturePhase.idle ? () => scanReceiptFlow(context, ref) : null,
+                  icon: const Icon(Icons.document_scanner_rounded),
+                  label: Text(l.scanReceipt),
+                ),
+              ]),
               const SizedBox(height: 8),
             ]),
           ),
           const SliverPadding(padding: EdgeInsets.fromLTRB(16, 0, 16, 24), sliver: SliverToBoxAdapter(child: TodaySummaryView())),
         ]),
       ),
-    ]);
+    ]),
+    );
+  }
+}
+
+/// Bottom sheet for typing a command. It owns its TextEditingController so the
+/// controller is disposed only after the sheet's closing animation finishes
+/// (disposing it earlier crashes: the TextField is still on screen).
+class _TypeCommandSheet extends StatefulWidget {
+  const _TypeCommandSheet();
+  @override
+  State<_TypeCommandSheet> createState() => _TypeCommandSheetState();
+}
+
+class _TypeCommandSheetState extends State<_TypeCommandSheet> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
+      child: Row(children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            autofocus: true,
+            maxLength: 500,
+            minLines: 1,
+            maxLines: 4,
+            // The keyboard's action key sends (instead of adding a new line).
+            textInputAction: TextInputAction.send,
+            decoration: InputDecoration(hintText: l.inputHint),
+            onSubmitted: (v) => Navigator.pop(context, v),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton.filled(
+          tooltip: l.send,
+          onPressed: () => Navigator.pop(context, _controller.text),
+          icon: const Icon(Icons.send_rounded),
+        ),
+      ]),
+    );
   }
 }
 

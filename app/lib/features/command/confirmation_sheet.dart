@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/dhaka_time.dart';
@@ -8,6 +9,9 @@ import '../../core/providers.dart';
 import '../../core/theme.dart';
 import '../../l10n/app_localizations.dart';
 import '../records/models.dart';
+import '../reminders/calendar_export.dart';
+import '../voice/face_mood.dart';
+import '../voice/orb_face.dart';
 import 'command_saver.dart';
 import 'parsed_command.dart';
 
@@ -25,6 +29,12 @@ Future<void> showConfirmationSheet(BuildContext context, WidgetRef ref, ParsedCo
   );
   if (result == null) return;
   final (saved, financial) = result;
+  // Bolo smiles and says "saved".
+  ref.read(faceMoodProvider.notifier).flash(FaceExpression.happy);
+  if (ref.read(voiceRepliesProvider)) {
+    final lang = ref.read(localeProvider).languageCode;
+    ref.read(voiceReplyProvider).speak(l.speakSaved, languageCode: lang);
+  }
   messenger.showSnackBar(SnackBar(
     content: Text(l.saved),
     duration: const Duration(seconds: 5),
@@ -52,6 +62,24 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
   );
   String? _settleId;
   bool _saving = false;
+  bool _addToCalendar = false;
+
+  /// Opens the phone's own contact picker. No contacts permission is needed:
+  /// Bolo only receives the one contact the user taps.
+  Future<void> _pickContact() async {
+    try {
+      final contact = await FlutterContacts.native.showPicker();
+      final name = contact?.displayName?.trim();
+      if (name != null && name.isNotEmpty) {
+        setState(() {
+          _person.text = name.length > 80 ? name.substring(0, 80) : name;
+          _sync();
+        });
+      }
+    } catch (e) {
+      debugPrint('Contact picker failed: $e');
+    }
+  }
 
   static String _plainAmount(int poisha) =>
       poisha % 100 == 0 ? '${poisha ~/ 100}' : (poisha / 100).toStringAsFixed(2);
@@ -138,6 +166,10 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
     try {
       // userConfirmed is true ONLY because this runs from a button the user tapped.
       final result = await saver.save(_draft, userConfirmed: true, settleEntryId: _settleId);
+      final at = _draft.instant;
+      if (_addToCalendar && at != null) {
+        await addToPhoneCalendar(title: _draft.title.trim(), start: at, description: 'বলো · Bolo');
+      }
       if (_draft.intent == CommandIntent.createReminder || _draft.remindBefore) {
         await ref.read(reminderSchedulerProvider).requestPermissions();
       }
@@ -287,9 +319,25 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
 
     Widget personField() => TextField(
           controller: _person,
-          decoration: InputDecoration(labelText: l.fieldPerson, prefixIcon: const Icon(Icons.person_rounded)),
+          decoration: InputDecoration(
+            labelText: l.fieldPerson,
+            prefixIcon: const Icon(Icons.person_rounded),
+            suffixIcon: IconButton(
+              tooltip: l.pickContact,
+              icon: const Icon(Icons.contacts_rounded),
+              onPressed: _pickContact,
+            ),
+          ),
           maxLength: 80,
           onChanged: (_) => setState(_sync),
+        );
+
+    Widget calendarToggle() => SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          secondary: const Icon(Icons.edit_calendar_rounded),
+          title: Text(l.addToCalendar),
+          value: _addToCalendar && _draft.date != null,
+          onChanged: _draft.date == null ? null : (v) => setState(() => _addToCalendar = v),
         );
 
     switch (_draft.intent) {
@@ -297,6 +345,7 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
         return [
           titleField(l.fieldTitle),
           dateTimeRow(),
+          calendarToggle(),
           gap(),
           Wrap(spacing: 8, children: [
             for (final r in ReminderRepeat.values)
@@ -319,6 +368,7 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
                 ? null
                 : (v) => setState(() => _draft = _draft.copyWith(reminderOffsetMinutes: v ? 1440 : 0)),
           ),
+          calendarToggle(),
         ];
       case CommandIntent.addExpense:
         return [

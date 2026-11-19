@@ -385,4 +385,74 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get enable => 'চালু করুন';
+
+  @override
+  String speakExpense(String amount, String category) {
+    return '$category-এ $amount টাকা খরচ। সেভ করব?';
+  }
+
+  @override
+  String speakReminder(String when, String title) {
+    return '$when মনে করিয়ে দেব: $title। ঠিক আছে?';
+  }
+
+  @override
+  String speakTask(String title) {
+    return 'নতুন কাজ: $title। সেভ করব?';
+  }
+
+  @override
+  String speakReceivable(String person, String amount) {
+    return '$person আপনাকে $amount টাকা দেবে। নিশ্চিত করুন।';
+  }
+
+  @override
+  String speakPayable(String person, String amount) {
+    return 'আপনি $person-কে $amount টাকা দেবেন। নিশ্চিত করুন।';
+  }
+
+  @override
+  String speakSettle(String person) {
+    return '$person-এর কোন হিসাবটি পরিশোধ হলো?';
+  }
+
+  @override
+  String get speakUnknown => 'দুঃখিত, বুঝতে পারিনি। ধরনটি বেছে নিন।';
+
+  @override
+  String get speakSaved => 'হয়ে গেছে, সেভ করেছি!';
+
+  @override
+  String get voiceReplies => 'ভয়েস উত্তর (বলো কথা বলবে)';
+
+  @override
+  String get voiceUnavailable =>
+      'এই ফোনে এই ভাষার ভয়েস ইনস্টল করা নেই। সেটিংস → টেক্সট-টু-স্পিচ থেকে ইনস্টল করুন।';
+
+  @override
+  String get pickContact => 'কন্টাক্ট থেকে বাছুন';
+
+  @override
+  String get addToCalendar => 'ফোনের ক্যালেন্ডারেও যোগ করুন';
+
+  @override
+  String get scanReceipt => 'রসিদ স্ক্যান';
+
+  @override
+  String get scanNoText =>
+      'কোনো লেখা পড়া যায়নি। ভালো আলোতে আবার চেষ্টা করুন, অথবা হাতে লিখুন।';
+
+  @override
+  String get scanFailed => 'এই ফোনে স্ক্যান কাজ করেনি। হাতে লিখে যোগ করুন।';
+
+  @override
+  String get scanHint =>
+      'ফোনেই পড়া হয়েছে, ছবিটি সাথে সাথে মুছে ফেলা হয়েছে। পরিমাণটি দেখে নিন।';
+
+  @override
+  String get devicePowers => 'ফোনের সুবিধা';
+
+  @override
+  String get devicePowersBody =>
+      'আপনি যা ট্যাপ করবেন বলো শুধু সেটুকুই ব্যবহার করে: কন্টাক্ট বাছাই ফোনের নিজস্ব তালিকায় হয় (শুধু বাছাই করা নামটি বলো দেখে), ক্যালেন্ডার আপনার ক্যালেন্ডার অ্যাপে খোলে, রসিদ ফোনেই পড়া হয় এবং ছবি মুছে ফেলা হয়। ব্যাকগ্রাউন্ডে কোনো অ্যাক্সেস নেই।';
 }

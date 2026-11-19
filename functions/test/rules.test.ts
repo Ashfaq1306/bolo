@@ -72,6 +72,11 @@ describe("validation", () => {
     await assertFails(setDoc(doc(alice(), "users/alice/expenses/e1"), expense({ amountPoisha: 1e12 })));
   });
 
+  it("accepts receipt-scan as a source, rejects made-up sources", async () => {
+    await assertSucceeds(setDoc(doc(alice(), "users/alice/expenses/e1"), expense({ source: "scan" })));
+    await assertFails(setDoc(doc(alice(), "users/alice/expenses/e2"), expense({ source: "telepathy" })));
+  });
+
   it("rejects unknown fields and categories", async () => {
     await assertFails(setDoc(doc(alice(), "users/alice/expenses/e1"), expense({ isAdmin: true })));
     await assertFails(setDoc(doc(alice(), "users/alice/expenses/e1"), expense({ category: "crypto" })));

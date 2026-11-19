@@ -16,6 +16,9 @@ Speak naturally in Bangla, English, or a mix. Bolo turns the sentence into a rem
 ## Features
 
 - 🎙️ **Voice or typed input**, with a live transcript and a GPU-shader **3D orb** that reacts to your voice
+- 😊 **Bolo has a face**: eyes that blink and follow your finger, a nose, and a mouth that moves with your voice. It looks curious while listening, thoughtful while thinking, happy after saving, and confused when it doesn't understand
+- 🔊 **Talks back** in Bangla or English with the phone's own voice
+- 📇 **Contacts, 📅 calendar, 🧾 receipt scan**, all without extra permissions: system pickers, a calendar intent, and on-device text recognition (the photo is deleted right after)
 - 🧠 **Intent and field extraction** for reminders, tasks/deadlines, expenses, receivables/payables, settling, and summaries
 - ✅ **Confirmation card**: everything is editable, and **money is never saved without an explicit Confirm**
 - 🕐 **Asia/Dhaka time** everywhere, with ambiguity handling for "৫টায়" (5 o'clock, but AM or PM?) and "kal" (yesterday or tomorrow?)

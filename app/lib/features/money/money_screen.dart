@@ -10,6 +10,7 @@ import '../../core/widgets/depth_card.dart';
 import '../../l10n/app_localizations.dart';
 import '../command/confirmation_sheet.dart';
 import '../command/parsed_command.dart';
+import '../receipt/scan_flow.dart';
 import '../records/models.dart';
 
 /// Expenses for the month plus the receivable/payable ledger.
@@ -34,7 +35,17 @@ class MoneyScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(l.navMoney), backgroundColor: Colors.transparent),
+      appBar: AppBar(
+        title: Text(l.navMoney),
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            tooltip: l.scanReceipt,
+            icon: const Icon(Icons.document_scanner_rounded),
+            onPressed: () => scanReceiptFlow(context, ref),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'addMoney',
         onPressed: () => showConfirmationSheet(context, ref, const ParsedCommand(intent: CommandIntent.addExpense)),

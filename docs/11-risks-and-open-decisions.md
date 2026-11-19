@@ -17,6 +17,9 @@
 | R11 | **Privacy expectations** (text sent to an AI provider) | Medium | High | Clear onboarding disclosure, no transcript storage by default, documented provider terms | All |
 | R12 | Team **inexperience** leads to fragile code | High | Medium | Small PRs, tests on logic, CI, this architecture, asking Claude to explain | All |
 | R14 | **Flutter 3.48+ moves Material widgets to a separate `material_ui` package** (`package:flutter/material.dart` is deprecated there) | Certain | Low | CI pinned to 3.47.7. Plan a deliberate upgrade: add `material_ui`, update imports, re-run tests | Dev A |
+| R15 | **Bangla TTS voice missing** on some phones | Medium | Low | Detect availability; stay silent instead of mispronouncing; Settings explains how to install the voice | Dev A |
+| R16 | **Receipt OCR can't read Bangla script** (ML Kit on-device supports Latin) | High | Low | Latin-digit totals still work; the card always asks to check; vision-AI option later with consent | Dev B |
+| R17 | Pressure to add **broad device permissions** (SMS, "all access") | Medium | High | Policy table in docs/03; each new permission needs a product purpose and a Play policy check | Lead |
 | R13 | **Losing the Play signing key** | Low | **Critical** | Play App Signing, two offline backups of the upload key | Lead |
 
 ## 11.2 Decisions taken in this session
@@ -25,6 +28,7 @@
 |---|---|---|
 | AI provider | Claude API, `claude-haiku-5-5`, server-side only | Team (answered) |
 | Firebase plan | Blaze, to be enabled by the team (card entered by the team) | Team (answered) |
+| Face & device powers (2026-11-19) | Friendly expressive face; voice replies, contacts picker, calendar intent, on-device receipt scan. All without new permissions | Team (answered) |
 | "3D & advanced" scope | GPU shader 3D voice orb + depth/parallax UI, with a reduce-motion fallback | Team (answered) |
 | Repo | Public GitHub repo `Ashfaq1306/bolo` | Team (answered) |
 | Firebase project | Existing `bolo-bd` (Firestore in `asia-south1`, Android app `bd.bolo.bolo_app`) | Architect (existing setup) |

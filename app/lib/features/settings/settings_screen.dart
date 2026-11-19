@@ -48,6 +48,21 @@ class SettingsScreen extends ConsumerWidget {
               selected: {ref.watch(speechLocaleProvider)},
               onSelectionChanged: (s) => ref.read(speechLocaleProvider.notifier).set(s.first),
             ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              secondary: const Icon(Icons.record_voice_over_rounded),
+              title: Text(l.voiceReplies),
+              value: ref.watch(voiceRepliesProvider),
+              onChanged: (v) => ref.read(voiceRepliesProvider.notifier).set(v),
+            ),
+            if (ref.watch(voiceRepliesProvider))
+              FutureBuilder<bool>(
+                future: ref.read(voiceReplyProvider).isAvailable(lang),
+                builder: (context, snap) => snap.data == false
+                    ? Text(l.voiceUnavailable, style: TextStyle(color: theme.colorScheme.error))
+                    : const SizedBox.shrink(),
+              ),
             const SizedBox(height: 16),
             Text(l.summaryTime, style: theme.textTheme.titleMedium),
             DropdownButton<int>(
@@ -111,6 +126,27 @@ class SettingsScreen extends ConsumerWidget {
         DepthCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
+              const Icon(Icons.devices_rounded),
+              const SizedBox(width: 8),
+              Text(l.devicePowers, style: theme.textTheme.titleMedium),
+            ]),
+            const SizedBox(height: 8),
+            Text(l.devicePowersBody),
+            const SizedBox(height: 8),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              Chip(avatar: const Icon(Icons.mic_rounded, size: 18), label: Text(l.navToday)),
+              Chip(avatar: const Icon(Icons.record_voice_over_rounded, size: 18), label: Text(l.voiceReplies.split('(').first.trim())),
+              Chip(avatar: const Icon(Icons.contacts_rounded, size: 18), label: Text(l.pickContact)),
+              Chip(avatar: const Icon(Icons.edit_calendar_rounded, size: 18), label: Text(l.addToCalendar)),
+              Chip(avatar: const Icon(Icons.document_scanner_rounded, size: 18), label: Text(l.scanReceipt)),
+              Chip(avatar: const Icon(Icons.notifications_rounded, size: 18), label: Text(l.remindersTitle)),
+            ]),
+          ]),
+        ),
+        const SizedBox(height: 12),
+        DepthCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
               const Icon(Icons.shield_rounded),
               const SizedBox(width: 8),
               Text(l.privacy, style: theme.textTheme.titleMedium),
@@ -125,34 +161,51 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _linkEmail(BuildContext context, WidgetRef ref) async {
     final l = AppLocalizations.of(context);
-    final email = TextEditingController();
-    final password = TextEditingController();
     final messenger = ScaffoldMessenger.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l.secureAccount),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: email, keyboardType: TextInputType.emailAddress, decoration: InputDecoration(labelText: l.email)),
-          const SizedBox(height: 8),
-          TextField(controller: password, obscureText: true, decoration: InputDecoration(labelText: l.password)),
-        ]),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
-          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(l.save)),
-        ],
-      ),
-    );
-    if (ok == true) {
-      try {
-        await ref.read(authServiceProvider).linkEmail(email.text, password.text);
-        ref.invalidate(authStateProvider);
-        messenger.showSnackBar(SnackBar(content: Text(l.saved)));
-      } on FirebaseAuthException catch (e) {
-        messenger.showSnackBar(SnackBar(content: Text(e.message ?? e.code)));
-      }
+    final creds = await showDialog<(String, String)>(context: context, builder: (_) => const _LinkEmailDialog());
+    if (creds == null) return;
+    try {
+      await ref.read(authServiceProvider).linkEmail(creds.$1, creds.$2);
+      ref.invalidate(authStateProvider);
+      messenger.showSnackBar(SnackBar(content: Text(l.saved)));
+    } on FirebaseAuthException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message ?? e.code)));
     }
-    email.dispose();
-    password.dispose();
+  }
+}
+
+/// Owns its controllers so they are disposed after the dialog is gone.
+class _LinkEmailDialog extends StatefulWidget {
+  const _LinkEmailDialog();
+  @override
+  State<_LinkEmailDialog> createState() => _LinkEmailDialogState();
+}
+
+class _LinkEmailDialogState extends State<_LinkEmailDialog> {
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l.secureAccount),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: InputDecoration(labelText: l.email)),
+        const SizedBox(height: 8),
+        TextField(controller: _password, obscureText: true, decoration: InputDecoration(labelText: l.password)),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.cancel)),
+        FilledButton(onPressed: () => Navigator.pop(context, (_email.text, _password.text)), child: Text(l.save)),
+      ],
+    );
   }
 }
