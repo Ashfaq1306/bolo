@@ -1,0 +1,31 @@
+﻿# Secrets: never commit
+.env
+.env.*
+!.env.example
+*.secret.local
+.secret.local
+service-account*.json
+*.keystore
+*.jks
+key.properties
+android/key.properties
+
+# Firebase / tooling
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*-debug.log
+functions/lib/
+functions/node_modules/
+node_modules/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Eval reports (regenerate with npm run eval)
+functions/eval/results/

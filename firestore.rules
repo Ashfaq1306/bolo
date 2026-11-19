@@ -1,0 +1,94 @@
+rules_version = '2';
+
+// Bolo security rules (docs/06-security-architecture.md).
+// 1. Default deny: anything not matched below is rejected.
+// 2. A user can only read/write documents under users/{their own uid}.
+// 3. Every write is validated: allowed keys, types, sizes and enum values.
+// 4. usage/{uid} (AI quota) is server-only: clients can't read or reset it.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    function data() { return request.resource.data; }
+    function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+    function optTs(v) { return v == null || v is timestamp; }
+    function money(v) { return v is int && v > 0 && v <= 100000000000; }
+    function source() { return data().source in ['voice', 'text', 'manual']; }
+
+    // createdAt is set once; updatedAt must be the server time on each write.
+    function stamps() {
+      return data().updatedAt == request.time
+        && (request.method == 'create'
+              ? data().createdAt == request.time
+              : data().createdAt == resource.data.createdAt);
+    }
+    function common() {
+      return stamps() && source() && data().schemaVersion is int
+        && (!('transcript' in data()) || str(data().transcript, 0, 500));
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && data().keys().hasOnly(['locale', 'summaryHour', 'storeTranscripts', 'createdAt', 'updatedAt', 'schemaVersion']);
+      allow delete: if false; // deleting an account goes through a server function
+
+      match /reminders/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().keys().hasOnly(['title', 'remindAt', 'repeat', 'status', 'notificationId', 'source', 'transcript', 'createdAt', 'updatedAt', 'schemaVersion'])
+          && str(data().title, 1, 200)
+          && data().remindAt is timestamp
+          && data().repeat in ['none', 'daily', 'weekly']
+          && data().status in ['pending', 'done', 'cancelled']
+          && data().notificationId is int
+          && common();
+      }
+
+      match /tasks/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().keys().hasOnly(['title', 'dueAt', 'remindAt', 'notificationId', 'priority', 'status', 'completedAt', 'source', 'transcript', 'createdAt', 'updatedAt', 'schemaVersion'])
+          && str(data().title, 1, 200)
+          && optTs(data().dueAt) && optTs(data().remindAt) && optTs(data().completedAt)
+          && data().notificationId is int
+          && data().priority in ['normal', 'high']
+          && data().status in ['open', 'done']
+          && common();
+      }
+
+      match /expenses/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().keys().hasOnly(['amountPoisha', 'currency', 'category', 'note', 'spentAt', 'source', 'transcript', 'createdAt', 'updatedAt', 'schemaVersion'])
+          && money(data().amountPoisha)
+          && data().currency == 'BDT'
+          && data().category in ['food', 'transport', 'bills', 'shopping', 'health', 'education', 'mobile_recharge', 'family', 'other']
+          && str(data().note, 0, 200)
+          && data().spentAt is timestamp
+          && common();
+      }
+
+      match /ledger/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().keys().hasOnly(['direction', 'person', 'amountPoisha', 'currency', 'dueAt', 'status', 'settledAt', 'note', 'source', 'transcript', 'createdAt', 'updatedAt', 'schemaVersion'])
+          && data().direction in ['receivable', 'payable']
+          && str(data().person, 1, 80)
+          && money(data().amountPoisha)
+          && data().currency == 'BDT'
+          && optTs(data().dueAt) && optTs(data().settledAt)
+          && data().status in ['open', 'settled']
+          && str(data().note, 0, 200)
+          && common();
+      }
+    }
+
+    // AI quota counters: written only by Cloud Functions (Admin SDK bypasses rules).
+    match /usage/{uid} {
+      allow read, write: if false;
+    }
+  }
+}

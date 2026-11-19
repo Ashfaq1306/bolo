@@ -1,0 +1,35 @@
+{
+  "name": "bolo-functions",
+  "version": "1.0.0",
+  "description": "Bolo Cloud Functions: parseCommand (Claude Haiku 5.5)",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest run --exclude test/rules.test.ts",
+    "test:rules": "vitest run test/rules.test.ts",
+    "serve": "npm run build && firebase emulators:start --only functions,firestore,auth",
+    "deploy": "firebase deploy --only functions",
+    "eval": "npm run build && node eval/run.cjs",
+    "eval:mock": "npm run build && node eval/run.cjs --mock"
+  },
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.10.0",
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "@types/node": "^22.20.5",
+    "firebase": "^13.4.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  },
+  "private": true,
+  "engines": {
+    "node": "22"
+  }
+}

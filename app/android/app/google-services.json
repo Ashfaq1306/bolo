@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "417187592646",
+    "project_id": "bolo-bd",
+    "storage_bucket": "bolo-bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417187592646:android:7af21872fac6776cd35ac7",
+        "android_client_info": {
+          "package_name": "bd.bolo.bolo_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0_s2j4NVVxkaeIjEl7u7Bkva0dF8Gf4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
