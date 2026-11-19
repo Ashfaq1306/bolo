@@ -17,6 +17,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Pinned to the team's local version so CI matches your machines.
+          # Upgrade deliberately (see docs/11, risk R10), not by surprise.
+          flutter-version: 3.47.7
           cache: true
       - run: flutter pub get
       - run: flutter analyze

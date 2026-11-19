@@ -16,6 +16,7 @@
 | R10 | Provider **API changes or price changes** | Medium | Medium | Single `callModel()` boundary, eval set, pinned SDK versions | Dev B |
 | R11 | **Privacy expectations** (text sent to an AI provider) | Medium | High | Clear onboarding disclosure, no transcript storage by default, documented provider terms | All |
 | R12 | Team **inexperience** leads to fragile code | High | Medium | Small PRs, tests on logic, CI, this architecture, asking Claude to explain | All |
+| R14 | **Flutter 3.48+ moves Material widgets to a separate `material_ui` package** (`package:flutter/material.dart` is deprecated there) | Certain | Low | CI pinned to 3.47.7. Plan a deliberate upgrade: add `material_ui`, update imports, re-run tests | Dev A |
 | R13 | **Losing the Play signing key** | Low | **Critical** | Play App Signing, two offline backups of the upload key | Lead |
 
 ## 11.2 Decisions taken in this session
