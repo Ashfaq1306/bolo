@@ -1,53 +1,53 @@
 {
-  "parameters": {
-    "latest_build_code": {
-      "defaultValue": {
-        "value": "1"
-      },
-      "valueType": "NUMBER",
-      "description": "Build number (the +N in pubspec version) of the newest APK on GitHub Releases. Apps with a lower build number show 'Update available'. Set by scripts/release.ps1."
-    },
-    "latest_version_name": {
-      "defaultValue": {
-        "value": "1.0.0"
-      },
-      "valueType": "STRING",
-      "description": "Human-readable version shown in the update dialog."
-    },
-    "min_build_code": {
-      "defaultValue": {
-        "value": "0"
-      },
-      "valueType": "NUMBER",
-      "description": "Builds below this MUST update (dialog can't be dismissed). Raise only for security fixes or breaking backend changes."
-    },
-    "apk_url": {
-      "defaultValue": {
-        "value": "https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo.apk"
-      },
-      "valueType": "STRING",
-      "description": "Where the newest APK is downloaded from. Must be https."
-    },
-    "update_notes_bn": {
-      "defaultValue": {
-        "value": "প্রথম পাবলিক ভার্সন: ভয়েস/লিখে কমান্ড, রিমাইন্ডার, কাজ, খরচ, কে কত পাবে/দেবে, রসিদ স্ক্যান, বলোর মুখ, এবং স্বয়ংক্রিয় আপডেট নোটিফিকেশন।"
-      },
-      "valueType": "STRING",
-      "description": "What's new (Bangla)."
-    },
-    "update_notes_en": {
-      "defaultValue": {
-        "value": "First public build: voice/typed commands, reminders, tasks, expenses, who-owes-whom, receipt scan, Bolo's face, and automatic update alerts."
-      },
-      "valueType": "STRING",
-      "description": "What's new (English)."
-    },
-    "apk_url_armv7": {
-      "defaultValue": {
-        "value": "https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo-armv7.apk"
-      },
-      "valueType": "STRING",
-      "description": "APK for old 32-bit (armeabi-v7a) phones."
-    }
-  }
+    "parameters":  {
+                       "latest_build_code":  {
+                                                 "defaultValue":  {
+                                                                      "value":  "2"
+                                                                  },
+                                                 "valueType":  "NUMBER",
+                                                 "description":  "Build number (the +N in pubspec version) of the newest APK on GitHub Releases. Apps with a lower build number show \u0027Update available\u0027. Set by scripts/release.ps1."
+                                             },
+                       "latest_version_name":  {
+                                                   "defaultValue":  {
+                                                                        "value":  "1.1.0"
+                                                                    },
+                                                   "valueType":  "STRING",
+                                                   "description":  "Human-readable version shown in the update dialog."
+                                               },
+                       "min_build_code":  {
+                                              "defaultValue":  {
+                                                                   "value":  "0"
+                                                               },
+                                              "valueType":  "NUMBER",
+                                              "description":  "Builds below this MUST update (dialog can\u0027t be dismissed). Raise only for security fixes or breaking backend changes."
+                                          },
+                       "apk_url":  {
+                                       "defaultValue":  {
+                                                            "value":  "https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo.apk"
+                                                        },
+                                       "valueType":  "STRING",
+                                       "description":  "Where the newest APK is downloaded from. Must be https."
+                                   },
+                       "update_notes_bn":  {
+                                               "defaultValue":  {
+                                                                    "value":  "বলো এখন হ্যান্ডস-ফ্রি রোবট সহকারী: স্ক্রিন বন্ধ বা লক থাকলেও \u0027বলো\u0027 (বা আপনার দেওয়া নাম) বলুন। কল করা, গান বাজানো, অ্যাপ খোলা আর \u0027১০ মিনিট পরে\u0027 রিমাইন্ডার দিতে পারে। নতুন কিউট রোবট মুখ ও আইকন, এবং অনেক বাগ ঠিক করা হয়েছে।"
+                                                                },
+                                               "valueType":  "STRING",
+                                               "description":  "What\u0027s new (Bangla)."
+                                           },
+                       "update_notes_en":  {
+                                               "defaultValue":  {
+                                                                    "value":  "Bolo is now a hands-free robot assistant: say \u0027Bolo\u0027 (or the name you choose) even when the screen is off or locked. It can call people, play music, open apps and set reminders like \u0027in 10 minutes\u0027. New cute robot face and icon, plus many bug fixes."
+                                                                },
+                                               "valueType":  "STRING",
+                                               "description":  "What\u0027s new (English)."
+                                           },
+                       "apk_url_armv7":  {
+                                             "defaultValue":  {
+                                                                  "value":  "https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo-armv7.apk"
+                                                              },
+                                             "valueType":  "STRING",
+                                             "description":  "APK for old 32-bit (armeabi-v7a) phones."
+                                         }
+                   }
 }
