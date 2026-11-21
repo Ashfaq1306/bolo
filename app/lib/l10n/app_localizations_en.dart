@@ -458,4 +458,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get devicePowersBody =>
       'Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.';
+
+  @override
+  String get updateTitle => 'Update available';
+
+  @override
+  String updateBody(String version) {
+    return 'Bolo $version is ready. Your data stays safe in your account.';
+  }
+
+  @override
+  String get updateMandatoryBody =>
+      'This update is required to keep using Bolo.';
+
+  @override
+  String get updateNow => 'Update';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateHowTo =>
+      'The new version downloads in your browser. Open it and tap Install (allow \"Install unknown apps\" if Android asks).';
+
+  @override
+  String get updateOpenFailed => 'Couldn\'t open the download link.';
+
+  @override
+  String get checkUpdates => 'Check for updates';
+
+  @override
+  String get upToDate => 'You have the latest version.';
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get offlineParserNote =>
+      'Understood on your phone (AI not connected). Please check the details.';
 }

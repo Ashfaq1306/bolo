@@ -56,6 +56,11 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <!-- Updates: open the APK download link in the browser. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
         <!-- Voice replies: find the phone's text-to-speech engine. -->
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />

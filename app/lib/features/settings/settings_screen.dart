@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/bangla_digits.dart';
 import '../../core/providers.dart';
@@ -8,6 +9,7 @@ import '../../core/widgets/depth_card.dart';
 import '../../l10n/app_localizations.dart';
 import '../command/capture_controller.dart';
 import '../records/models.dart';
+import '../update/update_prompt.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -96,6 +98,36 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ] else
               Text(l.accountSecured(user.email ?? '')),
+          ]),
+        ),
+        const SizedBox(height: 12),
+        DepthCard(
+          child: Row(children: [
+            const Icon(Icons.system_update_rounded),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snap) => Text(
+                  snap.hasData ? l.appVersion(localDigits('${snap.data!.version} (${snap.data!.buildNumber})', lang)) : '',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+            ),
+            FilledButton.tonal(
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                final updater = ref.read(appUpdaterProvider);
+                final update = await updater.check();
+                if (!context.mounted) return;
+                if (update == null) {
+                  messenger.showSnackBar(SnackBar(content: Text(l.upToDate)));
+                } else {
+                  await showUpdateDialog(context, updater, update);
+                }
+              },
+              child: Text(l.checkUpdates),
+            ),
           ]),
         ),
         const SizedBox(height: 12),

@@ -65,6 +65,7 @@ class ParsedCommand {
     this.clarification,
     this.transcript = '',
     this.source = RecordSource.manual,
+    this.onDevice = false,
   });
 
   final CommandIntent intent;
@@ -82,6 +83,10 @@ class ParsedCommand {
   final String? clarification;
   final String transcript;
   final RecordSource source;
+
+  /// True when the free on-device rules parser filled this card (the AI
+  /// wasn't reachable). The card says so, so the user checks it carefully.
+  final bool onDevice;
 
   /// The exact Dhaka instant this command refers to (null if no date).
   DateTime? get instant => DhakaTime.combine(date, time);
@@ -102,6 +107,7 @@ class ParsedCommand {
     Ambiguity? ambiguity,
     int? reminderOffsetMinutes,
     ReminderRepeat? repeat,
+    bool? onDevice,
   }) =>
       ParsedCommand(
         intent: intent ?? this.intent,
@@ -119,6 +125,7 @@ class ParsedCommand {
         clarification: clarification,
         transcript: transcript,
         source: source,
+        onDevice: onDevice ?? this.onDevice,
       );
 
   /// Builds a command from the `parseCommand` function response.

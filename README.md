@@ -27,6 +27,26 @@ Speak naturally in Bangla, English, or a mix. Bolo turns the sentence into a rem
 - 🔒 **Per-user isolation** enforced by tested Firestore rules, a server-side AI quota, and no audio storage
 - ♿ Bangla-first UI with Bangla digits, the bundled Hind Siliguri font, screen-reader labels, and a reduce-motion fallback
 
+## Install (Android)
+
+**Download:** <https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo.apk>. This link always points to the newest version, so it's the one to share.
+
+Open the file on the phone and tap **Install**. If Android asks, allow "Install unknown apps" for your browser.
+
+**Updates are automatic to offer:** every time Bolo opens, it checks Firebase Remote Config. If a newer build exists, it shows **Update available**; one tap downloads it, and Android asks you to install it. Your data is kept, because it lives in your account. Android never lets an app replace itself without that final tap.
+
+**Without the AI server:** until the Cloud Function is deployed (Blaze plan plus an API key), Bolo understands commands with a free on-device rules parser. The card then says "Understood on your phone", so check it before saving.
+
+### Publishing an update (team)
+
+```powershell
+./scripts/release.ps1 -NotesEn "What changed" -NotesBn "কী বদলেছে"
+```
+
+The script bumps the version, runs the tests, builds a signed APK, tags and pushes, uploads `bolo.apk` to GitHub Releases, and then updates Remote Config so every installed copy offers the update. Add `-Mandatory` for a security fix that old builds must install.
+
+The release key lives **outside git** (`app/android/key.properties` points to it). Every update must be signed with the same key, so back it up in two places.
+
 ## Documentation
 
 | # | Document |

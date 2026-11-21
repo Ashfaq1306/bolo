@@ -13,6 +13,7 @@ import '../features/records/models.dart';
 import '../features/records/records_repository.dart';
 import '../features/reminders/reminder_scheduler.dart';
 import '../features/summary/daily_summary.dart';
+import '../features/update/app_updater.dart';
 import '../features/receipt/receipt_scanner.dart';
 import '../features/voice/speech_service.dart';
 import '../features/voice/voice_reply.dart';
@@ -52,8 +53,16 @@ final speechServiceProvider = Provider<SpeechService>((ref) {
 
 /// Cloud Functions in the same region as Firestore (Mumbai, closest to Dhaka).
 final commandServiceProvider = Provider<CommandService>(
-  (ref) => CloudCommandService(FirebaseFunctions.instanceFor(region: 'asia-south1')),
+  // The AI first; if the server can't answer (function not deployed yet, or
+  // it failed), the free on-device rules parser fills the card instead.
+  (ref) => FallbackCommandService(
+    CloudCommandService(FirebaseFunctions.instanceFor(region: 'asia-south1')),
+    clock: ref.read(clockProvider),
+  ),
 );
+
+/// Checks Firebase Remote Config for a newer APK (see app_updater.dart).
+final appUpdaterProvider = Provider<AppUpdater>((ref) => RemoteConfigAppUpdater());
 
 final commandSaverProvider = Provider<CommandSaver?>((ref) {
   final repo = ref.watch(recordsRepositoryProvider);

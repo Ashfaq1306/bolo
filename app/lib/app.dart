@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +12,8 @@ import 'features/home/home_screen.dart';
 import 'features/money/money_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/tasks/tasks_screen.dart';
+import 'features/update/app_updater.dart';
+import 'features/update/update_prompt.dart';
 import 'l10n/app_localizations.dart';
 
 class BoloApp extends ConsumerWidget {
@@ -94,18 +98,38 @@ class HomeShell extends ConsumerStatefulWidget {
 
 class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserver {
   int _index = 0;
+  StreamSubscription<AppUpdate?>? _liveUpdates;
+  int _shownUpdateBuild = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _resyncNotifications());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _resyncNotifications();
+      _checkForUpdate();
+    });
   }
 
   @override
   void dispose() {
+    _liveUpdates?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  /// Asks Firebase Remote Config whether a newer APK was published, and keeps
+  /// listening so a release made while the app is open shows up right away.
+  Future<void> _checkForUpdate() async {
+    final updater = ref.read(appUpdaterProvider);
+    _offerUpdate(updater, await updater.check());
+    _liveUpdates ??= updater.liveUpdates.listen((u) => _offerUpdate(updater, u));
+  }
+
+  void _offerUpdate(AppUpdater updater, AppUpdate? update) {
+    if (update == null || !mounted || update.latestBuild <= _shownUpdateBuild) return;
+    _shownUpdateBuild = update.latestBuild; // once per new build per session
+    showUpdateDialog(context, updater, update);
   }
 
   @override

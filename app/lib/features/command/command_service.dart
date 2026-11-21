@@ -2,6 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 
 import '../../core/dhaka_time.dart';
 import '../records/models.dart';
+import 'on_device_parser.dart';
 import 'parsed_command.dart';
 
 enum ParseFailure { offline, quotaExceeded, notSignedIn, tooLong, server }
@@ -69,6 +70,31 @@ class CloudCommandService implements CommandService {
     } catch (e) {
       // Socket errors etc. surface here when the phone is offline.
       throw ParseException(ParseFailure.offline, e.toString());
+    }
+  }
+}
+
+/// Tries [primary] (the AI). When the server fails — e.g. the function isn't
+/// deployed yet, or the AI errored — it parses on the phone with
+/// [parseOnDevice] so the user still gets a pre-filled card.
+///
+/// Offline, quota, sign-in and too-long errors are passed through unchanged:
+/// those have their own handling (Inbox, messages) in the capture flow.
+class FallbackCommandService implements CommandService {
+  FallbackCommandService(this.primary, {DateTime Function()? clock}) : _clock = clock ?? DateTime.now;
+
+  final CommandService primary;
+  final DateTime Function() _clock;
+
+  @override
+  Future<ParsedCommand> parse(String text, {required RecordSource source, required String locale}) async {
+    try {
+      return await primary.parse(text, source: source, locale: locale);
+    } on ParseException catch (e) {
+      if (e.failure != ParseFailure.server || text.trim().isEmpty) rethrow;
+      final clean = text.trim().replaceAll(RegExp(r'\s+'), ' ');
+      return ParsedCommand.fromServer(parseOnDevice(clean, _clock()), transcript: clean, source: source)
+          .copyWith(onDevice: true);
     }
   }
 }

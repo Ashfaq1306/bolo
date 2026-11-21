@@ -225,5 +225,18 @@
   "scanFailed": "Scanning didn't work on this phone. Please enter it by hand.",
   "scanHint": "Read on your phone; the photo is deleted right away. Please check the amount.",
   "devicePowers": "Device features",
-  "devicePowersBody": "Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access."
+  "devicePowersBody": "Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.",
+  "updateTitle": "Update available",
+  "updateBody": "Bolo {version} is ready. Your data stays safe in your account.",
+  "@updateBody": {"placeholders": {"version": {"type": "String"}}},
+  "updateMandatoryBody": "This update is required to keep using Bolo.",
+  "updateNow": "Update",
+  "updateLater": "Later",
+  "updateHowTo": "The new version downloads in your browser. Open it and tap Install (allow \"Install unknown apps\" if Android asks).",
+  "updateOpenFailed": "Couldn't open the download link.",
+  "checkUpdates": "Check for updates",
+  "upToDate": "You have the latest version.",
+  "appVersion": "Version {version}",
+  "@appVersion": {"placeholders": {"version": {"type": "String"}}},
+  "offlineParserNote": "Understood on your phone (AI not connected). Please check the details."
 }

@@ -222,6 +222,8 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
               ],
             ),
             const SizedBox(height: 16),
+            if (_draft.onDevice)
+              _Banner(icon: Icons.phone_android_rounded, color: BoloColors.violet, text: l.offlineParserNote),
             if (ambiguityText != null || _draft.clarification != null)
               _Banner(
                 icon: Icons.help_rounded,

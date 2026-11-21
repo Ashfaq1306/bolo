@@ -925,6 +925,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.'**
   String get devicePowersBody;
+
+  /// No description provided for @updateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get updateTitle;
+
+  /// No description provided for @updateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bolo {version} is ready. Your data stays safe in your account.'**
+  String updateBody(String version);
+
+  /// No description provided for @updateMandatoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This update is required to keep using Bolo.'**
+  String get updateMandatoryBody;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateNow;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
+  /// No description provided for @updateHowTo.
+  ///
+  /// In en, this message translates to:
+  /// **'The new version downloads in your browser. Open it and tap Install (allow \"Install unknown apps\" if Android asks).'**
+  String get updateHowTo;
+
+  /// No description provided for @updateOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the download link.'**
+  String get updateOpenFailed;
+
+  /// No description provided for @checkUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get checkUpdates;
+
+  /// No description provided for @upToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You have the latest version.'**
+  String get upToDate;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @offlineParserNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Understood on your phone (AI not connected). Please check the details.'**
+  String get offlineParserNote;
 }
 
 class _AppLocalizationsDelegate

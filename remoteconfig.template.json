@@ -1,0 +1,34 @@
+{
+  "parameters": {
+    "latest_build_code": {
+      "defaultValue": { "value": "1" },
+      "valueType": "NUMBER",
+      "description": "Build number (the +N in pubspec version) of the newest APK on GitHub Releases. Apps with a lower build number show 'Update available'. Set by scripts/release.ps1."
+    },
+    "latest_version_name": {
+      "defaultValue": { "value": "1.0.0" },
+      "valueType": "STRING",
+      "description": "Human-readable version shown in the update dialog."
+    },
+    "min_build_code": {
+      "defaultValue": { "value": "0" },
+      "valueType": "NUMBER",
+      "description": "Builds below this MUST update (dialog can't be dismissed). Raise only for security fixes or breaking backend changes."
+    },
+    "apk_url": {
+      "defaultValue": { "value": "https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo.apk" },
+      "valueType": "STRING",
+      "description": "Where the newest APK is downloaded from. Must be https."
+    },
+    "update_notes_bn": {
+      "defaultValue": { "value": "" },
+      "valueType": "STRING",
+      "description": "What's new (Bangla)."
+    },
+    "update_notes_en": {
+      "defaultValue": { "value": "" },
+      "valueType": "STRING",
+      "description": "What's new (English)."
+    }
+  }
+}

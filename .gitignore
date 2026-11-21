@@ -29,3 +29,6 @@ Thumbs.db
 
 # Eval reports (regenerate with npm run eval)
 functions/eval/results/
+
+# Built APKs (published on GitHub Releases, not committed)
+dist/

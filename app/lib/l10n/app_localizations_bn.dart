@@ -455,4 +455,44 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get devicePowersBody =>
       'আপনি যা ট্যাপ করবেন বলো শুধু সেটুকুই ব্যবহার করে: কন্টাক্ট বাছাই ফোনের নিজস্ব তালিকায় হয় (শুধু বাছাই করা নামটি বলো দেখে), ক্যালেন্ডার আপনার ক্যালেন্ডার অ্যাপে খোলে, রসিদ ফোনেই পড়া হয় এবং ছবি মুছে ফেলা হয়। ব্যাকগ্রাউন্ডে কোনো অ্যাক্সেস নেই।';
+
+  @override
+  String get updateTitle => 'নতুন আপডেট এসেছে';
+
+  @override
+  String updateBody(String version) {
+    return 'বলো $version তৈরি। আপনার তথ্য আপনার অ্যাকাউন্টে নিরাপদ থাকবে।';
+  }
+
+  @override
+  String get updateMandatoryBody =>
+      'বলো ব্যবহার চালিয়ে যেতে এই আপডেটটি দরকার।';
+
+  @override
+  String get updateNow => 'আপডেট করুন';
+
+  @override
+  String get updateLater => 'পরে';
+
+  @override
+  String get updateHowTo =>
+      'নতুন ভার্সন ব্রাউজারে ডাউনলোড হবে। ফাইলটি খুলে Install চাপুন (Android জিজ্ঞেস করলে \"Install unknown apps\" চালু করুন)।';
+
+  @override
+  String get updateOpenFailed => 'ডাউনলোড লিংক খোলা যায়নি।';
+
+  @override
+  String get checkUpdates => 'আপডেট আছে কিনা দেখুন';
+
+  @override
+  String get upToDate => 'আপনার কাছে সর্বশেষ ভার্সন আছে।';
+
+  @override
+  String appVersion(String version) {
+    return 'ভার্সন $version';
+  }
+
+  @override
+  String get offlineParserNote =>
+      'ফোনেই বোঝা হয়েছে (AI সংযুক্ত নেই)। বিস্তারিত দেখে নিন।';
 }
