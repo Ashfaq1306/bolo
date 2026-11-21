@@ -40,7 +40,11 @@ $repo = "Ashfaq1306/bolo"
 
 function Invoke-Step([string]$what, [scriptblock]$cmd) {
   Write-Host "==> $what" -ForegroundColor Cyan
-  & $cmd
+  # Judge native tools by exit code only: Windows PowerShell 5.1 would
+  # otherwise abort on harmless warnings they print to stderr.
+  $saved = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try { & $cmd 2>&1 | ForEach-Object { "$_" } } finally { $ErrorActionPreference = $saved }
   if ($LASTEXITCODE -ne 0) { throw "$what failed (exit $LASTEXITCODE)" }
 }
 
