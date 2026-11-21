@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,8 @@ import 'core/bangla_digits.dart';
 import 'core/money.dart';
 import 'core/providers.dart';
 import 'core/theme.dart';
+import 'features/assistant/assistant_settings.dart';
+import 'features/command/capture_controller.dart';
 import 'features/home/home_screen.dart';
 import 'features/money/money_screen.dart';
 import 'features/settings/settings_screen.dart';
@@ -100,6 +103,8 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   int _index = 0;
   StreamSubscription<AppUpdate?>? _liveUpdates;
   int _shownUpdateBuild = 0;
+  VoidCallback? _speakingListener;
+  ValueListenable<bool>? _speaking;
 
   @override
   void initState() {
@@ -108,12 +113,60 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _resyncNotifications();
       _checkForUpdate();
+      _setUpWakeWord();
     });
+  }
+
+  // ---------------- hands-free: "Bolo!" ----------------
+
+  Future<void> _setUpWakeWord() async {
+    final device = ref.read(deviceBridgeProvider);
+    device.onWake = (locked) => _onWake(locked: locked);
+    final speaking = _speaking = ref.read(voiceReplyProvider).speaking;
+    _speakingListener = () =>
+        _wakeMicGuard(speaking.value || ref.read(captureControllerProvider).phase != CapturePhase.idle);
+    speaking.addListener(_speakingListener!);
+    // (Re)start the listener if hands-free is on (e.g. after a reboot).
+    await ref.read(wakeSyncProvider)();
+    // Opened by the wake word from the background / lock screen?
+    final launch = await device.consumeWake();
+    if (launch.wake) await _onWake(locked: launch.locked);
+  }
+
+  /// The user said the assistant's name: come forward, greet, and listen.
+  Future<void> _onWake({required bool locked}) async {
+    if (!mounted) return;
+    final l = AppLocalizations.of(context);
+    final lang = ref.read(localeProvider).languageCode;
+    Navigator.of(context).popUntil((r) => r.isFirst);
+    setState(() => _index = 0);
+    ref.read(wakeSessionProvider.notifier).begin(locked: locked);
+    final voice = ref.read(voiceReplyProvider);
+    await voice.stop();
+    if (ref.read(voiceRepliesProvider)) {
+      await voice.speak(l.wakeGreeting, languageCode: lang);
+    }
+    final capture = ref.read(captureControllerProvider);
+    if (mounted && capture.phase == CapturePhase.idle) {
+      await ref.read(captureControllerProvider.notifier).toggleListening();
+    }
+  }
+
+  /// While Bolo itself listens or talks, the wake word listener must not use
+  /// the microphone (and must not hear Bolo say its own name).
+  void _wakeMicGuard(bool busy) {
+    final device = ref.read(deviceBridgeProvider);
+    if (busy) {
+      device.wakePause();
+    } else if (!ref.read(wakeSessionProvider).active) {
+      device.wakeResume();
+    }
   }
 
   @override
   void dispose() {
     _liveUpdates?.cancel();
+    if (_speakingListener != null) _speaking?.removeListener(_speakingListener!);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -164,6 +217,16 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final session = ref.watch(wakeSessionProvider);
+    ref.listen(captureControllerProvider.select((c) => c.phase), (prev, phase) {
+      _wakeMicGuard(phase != CapturePhase.idle);
+      ref.read(wakeSessionProvider.notifier).touch();
+    });
+
+    // Over the lock screen: only the robot, no personal data, no tabs.
+    if (session.locked) {
+      return const Scaffold(body: HomeScreen(privacy: true));
+    }
     return Scaffold(
       body: IndexedStack(index: _index, children: const [
         HomeScreen(),

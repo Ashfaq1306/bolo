@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_listening_title">কথা বলতে “%1$s” বলুন</string>
+    <string name="wake_listening_text">%1$s এই ফোনেই নিজের নাম শোনার অপেক্ষায় আছে। কিছুই রেকর্ড বা পাঠানো হয় না।</string>
+    <string name="wake_stop">শোনা বন্ধ করুন</string>
+    <string name="wake_heard_title">%1$s হাজির</string>
+    <string name="wake_heard_text">কথা বলতে ট্যাপ করুন</string>
+    <string name="wake_channel_listen">হ্যান্ডস-ফ্রি শোনা</string>
+    <string name="wake_channel_alert">যখন বলোকে ডাকবেন</string>
+</resources>

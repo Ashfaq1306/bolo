@@ -72,17 +72,22 @@ $tag = "v$name"
 Write-Host "Releasing Bolo $name (build $build)" -ForegroundColor Green
 
 # ---- 2. test + build ----
+Invoke-Step "Wake word model" { powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "fetch-wake-model.ps1") }
 Push-Location $app
 try {
   if (-not $SkipTests) { Invoke-Step "Tests" { flutter test } }
-  Invoke-Step "Build APK" { flutter build apk --release --obfuscate --split-debug-info=build/symbols/$name }
+  # One APK per processor: much smaller downloads than a universal APK.
+  Invoke-Step "Build APK" { flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols/$name }
 } finally { Pop-Location }
 
 $dist = Join-Path $root "dist"
 New-Item -ItemType Directory -Force $dist | Out-Null
 $apk = Join-Path $dist "bolo.apk"
-Copy-Item (Join-Path $app "build/app/outputs/flutter-apk/app-release.apk") $apk -Force
+$apk32 = Join-Path $dist "bolo-armv7.apk"
+Copy-Item (Join-Path $app "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk") $apk -Force
+Copy-Item (Join-Path $app "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk") $apk32 -Force
 $sha = (Get-FileHash $apk -Algorithm SHA256).Hash.ToLower()
+$sha32 = (Get-FileHash $apk32 -Algorithm SHA256).Hash.ToLower()
 
 # ---- 3. commit + tag ----
 if (-not $NoBump) {
@@ -103,11 +108,13 @@ $NotesEn
 (allow "Install unknown apps" for your browser if Android asks).
 Already installed? Just open Bolo: it will offer the update itself.
 
-SHA-256: ``$sha``
+``bolo.apk`` is for almost all phones (64-bit). Very old 32-bit phones: ``bolo-armv7.apk``.
+
+SHA-256: ``$sha`` (bolo.apk), ``$sha32`` (bolo-armv7.apk)
 "@
 $notesFile = Join-Path $env:TEMP "bolo-release-notes.md"
 [IO.File]::WriteAllText($notesFile, $notes)
-Invoke-Step "GitHub Release" { gh release create $tag "$apk#bolo.apk (Android)" --repo $repo --title "Bolo $name" --notes-file $notesFile --latest }
+Invoke-Step "GitHub Release" { gh release create $tag "$apk#bolo.apk (Android, 64-bit)" "$apk32#bolo-armv7.apk (old 32-bit phones)" --repo $repo --title "Bolo $name" --notes-file $notesFile --latest }
 
 # ---- 5. tell installed apps ----
 $rc = Get-Content $template -Raw | ConvertFrom-Json

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -71,6 +72,7 @@ class RemoteConfigAppUpdater implements AppUpdater {
       'latest_version_name': '',
       'min_build_code': 0,
       'apk_url': defaultApkUrl,
+      'apk_url_armv7': '',
       'update_notes_bn': '',
       'update_notes_en': '',
     });
@@ -79,10 +81,15 @@ class RemoteConfigAppUpdater implements AppUpdater {
 
   Future<AppUpdate?> _evaluate() async {
     final info = await PackageInfo.fromPlatform();
-    final installed = int.tryParse(info.buildNumber) ?? 0;
+    // Per-processor APKs get 1000 x ABI added to their version code by
+    // Flutter (e.g. build 2 -> 2002 on arm64), so compare the base build.
+    final installed = (int.tryParse(info.buildNumber) ?? 0) % 1000;
     final latest = _config.getInt('latest_build_code');
     if (latest <= installed) return null;
-    final url = _config.getString('apk_url');
+    // Old 32-bit phones need their own APK.
+    var url = _config.getString('apk_url');
+    final armv7 = _config.getString('apk_url_armv7');
+    if (armv7.isNotEmpty && (await _primaryAbi()).startsWith('armeabi')) url = armv7;
     final uri = Uri.tryParse(url);
     // Only ever open an https link (never a link that could run something else).
     if (uri == null || uri.scheme != 'https') return null;
@@ -94,6 +101,14 @@ class RemoteConfigAppUpdater implements AppUpdater {
       notesEn: _config.getString('update_notes_en'),
       mandatory: installed < _config.getInt('min_build_code'),
     );
+  }
+
+  static Future<String> _primaryAbi() async {
+    try {
+      return await const MethodChannel('bolo/device').invokeMethod<String>('primaryAbi') ?? '';
+    } catch (_) {
+      return '';
+    }
   }
 
   @override

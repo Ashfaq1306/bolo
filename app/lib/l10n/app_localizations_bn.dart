@@ -25,7 +25,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get greetingNight => 'শুভ রাত্রি';
 
   @override
-  String get tapToSpeak => 'অরবে ট্যাপ করে বলুন';
+  String tapToSpeak(String name) {
+    return '$name-কে ট্যাপ করে বলুন';
+  }
 
   @override
   String get orbLabel => 'ভয়েস ইনপুট। শোনা শুরু বা বন্ধ করতে ডাবল ট্যাপ করুন।';
@@ -269,8 +271,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get dueTasks => 'বাকি ও সময় পেরোনো কাজ';
 
   @override
-  String get nothingToday =>
-      'আজকের জন্য এখনও কিছু নেই। অরবে ট্যাপ করে কিছু বলুন।';
+  String nothingToday(String name) {
+    return 'আজকের জন্য এখনও কিছু নেই। $name-কে ট্যাপ করে কিছু বলুন।';
+  }
 
   @override
   String get tasksTitle => 'কাজ';
@@ -454,7 +457,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get devicePowersBody =>
-      'আপনি যা ট্যাপ করবেন বলো শুধু সেটুকুই ব্যবহার করে: কন্টাক্ট বাছাই ফোনের নিজস্ব তালিকায় হয় (শুধু বাছাই করা নামটি বলো দেখে), ক্যালেন্ডার আপনার ক্যালেন্ডার অ্যাপে খোলে, রসিদ ফোনেই পড়া হয় এবং ছবি মুছে ফেলা হয়। ব্যাকগ্রাউন্ডে কোনো অ্যাক্সেস নেই।';
+      'আপনি যা বলবেন বলো শুধু সেটুকুই ব্যবহার করে: কাউকে কল করতে বললে কন্টাক্ট ফোনেই খোঁজা হয় (নাম কোথাও পাঠানো হয় না), কল করার আগে আপনার সম্মতি লাগে, গান ও অ্যাপ নিজ নিজ অ্যাপে খোলে, রসিদ ফোনেই পড়া হয় এবং ছবি মুছে ফেলা হয়। ব্যাকগ্রাউন্ডে শুধু ঐচ্ছিক \"বলো\" শোনার ব্যবস্থা চলে, যা ফোনেই কাজ করে এবং চালু থাকলে নোটিফিকেশন দেখায়।';
 
   @override
   String get updateTitle => 'নতুন আপডেট এসেছে';
@@ -495,4 +498,146 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get offlineParserNote =>
       'ফোনেই বোঝা হয়েছে (AI সংযুক্ত নেই)। বিস্তারিত দেখে নিন।';
+
+  @override
+  String get nothingPlannedToday => 'আজ কোনো রিমাইন্ডার বা কাজ নেই।';
+
+  @override
+  String get exactAlarmTitle => 'রিমাইন্ডার ঠিক সময়ে বাজবে?';
+
+  @override
+  String get exactAlarmBody =>
+      'Android রিমাইন্ডার কয়েক মিনিট দেরিতে দিতে পারে। পরের স্ক্রিনে বলোর জন্য \"Allow setting alarms and reminders\" চালু করুন, তাহলে ঠিক সময়ে বাজবে।';
+
+  @override
+  String get exactAlarmOpen => 'চালু করুন';
+
+  @override
+  String get intentCall => 'কল';
+
+  @override
+  String get intentPlay => 'গান';
+
+  @override
+  String get intentOpen => 'অ্যাপ খোলা';
+
+  @override
+  String speakCall(String name) {
+    return '$name-কে কল করছি।';
+  }
+
+  @override
+  String speakPlay(String query) {
+    return 'চালাচ্ছি: $query।';
+  }
+
+  @override
+  String speakOpen(String app) {
+    return '$app খুলছি।';
+  }
+
+  @override
+  String get wakeGreeting => 'জি, বলুন। কী করতে পারি?';
+
+  @override
+  String get needUnlock => 'আগে ফোনটা আনলক করুন।';
+
+  @override
+  String appNotFound(String app) {
+    return '\"$app\" নামে কোনো অ্যাপ পাইনি।';
+  }
+
+  @override
+  String get playFailed => 'এই ফোনে কোনো গানের অ্যাপ বা YouTube পাইনি।';
+
+  @override
+  String get callWho => 'কাকে কল করবো?';
+
+  @override
+  String get callButton => 'কল';
+
+  @override
+  String callNoMatch(String name) {
+    return 'কন্টাক্টে \"$name\" নামে কাউকে পাইনি।';
+  }
+
+  @override
+  String get callTypeNumber => 'অথবা নম্বর লিখুন';
+
+  @override
+  String get contactsPermissionNeeded =>
+      'নাম দিয়ে খুঁজতে বলোকে কন্টাক্ট দেখার অনুমতি দিন। অথবা নিচ থেকে বাছুন।';
+
+  @override
+  String callConfirmQuestion(String name) {
+    return '$name-কে কল করবো?';
+  }
+
+  @override
+  String get callDialerNote =>
+      'কল করার অনুমতি নেই, তাই নম্বরসহ ডায়ালার খোলা হলো।';
+
+  @override
+  String get lockedHint =>
+      'ফোন লক করা আছে: বলো শুধু শুনছে। আনলক না করা পর্যন্ত আপনার তথ্য লুকানো থাকবে।';
+
+  @override
+  String get assistantTitle => 'সহকারী';
+
+  @override
+  String get assistantName => 'সহকারীর নাম';
+
+  @override
+  String get assistantNameHint =>
+      'এই নামে ডাকবেন। ইংরেজি অক্ষরে লিখুন, যেমন Bolo, Robi, Mina।';
+
+  @override
+  String get assistantNameInvalid => '২–২০টি ইংরেজি অক্ষর ব্যবহার করুন।';
+
+  @override
+  String get assistantNameUnknown =>
+      'অফলাইন শোনার ব্যবস্থা এই শব্দটি চেনে না, তাই শুনতে পাবে না। অন্য নাম দিন (যেমন Bolo, Robi, Mina, Jarvis)।';
+
+  @override
+  String handsFree(String name) {
+    return '\"$name\" বললে সাড়া দেবে';
+  }
+
+  @override
+  String handsFreeBody(String name) {
+    return 'স্ক্রিন বন্ধ বা লক থাকলেও \"$name\" বলুন। শোনা হয় এই ফোনেই; কিছুই রেকর্ড বা পাঠানো হয় না।';
+  }
+
+  @override
+  String get sensitivity => 'নাম কতটা সহজে শুনবে';
+
+  @override
+  String get sensLow => 'কম';
+
+  @override
+  String get sensNormal => 'স্বাভাবিক';
+
+  @override
+  String get sensHigh => 'বেশি';
+
+  @override
+  String get allowLockScreen => 'লক স্ক্রিনে আসতে দিন';
+
+  @override
+  String get allowOverApps => 'অন্য অ্যাপের উপরে আসতে দিন';
+
+  @override
+  String get allowButton => 'অনুমতি দিন';
+
+  @override
+  String get allowedLabel => 'চালু';
+
+  @override
+  String get handsFreeLimits =>
+      'ফোন চালু থাকলে কাজ করবে (স্ক্রিন বন্ধ বা লক থাকলেও), ফোন পুরো বন্ধ থাকলে নয়। ব্যাটারি একটু বেশি লাগবে এবং একটি স্থায়ী নোটিফিকেশন থাকবে। ফোন রিস্টার্টের পর একবার বলো খুলুন।';
+
+  @override
+  String assistantCanDo(String name) {
+    return 'বলে দেখুন: \"$name, আম্মুকে ফোন দাও\", \"আরিজিত সিং এর গান বাজাও\", \"YouTube খোলো\", \"১০ মিনিট পরে পানি খেতে মনে করিয়ে দিও\"।';
+  }
 }

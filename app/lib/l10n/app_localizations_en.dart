@@ -25,7 +25,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get greetingNight => 'Good night';
 
   @override
-  String get tapToSpeak => 'Tap the orb and speak';
+  String tapToSpeak(String name) {
+    return 'Tap $name and speak';
+  }
 
   @override
   String get orbLabel => 'Voice input. Double tap to start or stop listening.';
@@ -269,8 +271,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dueTasks => 'Due & overdue';
 
   @override
-  String get nothingToday =>
-      'Nothing for today yet. Tap the orb and tell me something.';
+  String nothingToday(String name) {
+    return 'Nothing for today yet. Tap $name and tell me something.';
+  }
 
   @override
   String get tasksTitle => 'Tasks';
@@ -457,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get devicePowersBody =>
-      'Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.';
+      'Bolo only uses what you ask for: contacts are searched on the phone when you ask it to call someone (names are never uploaded), calls need your confirmation, music and apps open in their own apps, receipts are read on the phone and the photo is deleted. The only background access is the optional \"Bolo\" listener, which runs on the phone and shows a notification while on.';
 
   @override
   String get updateTitle => 'Update available';
@@ -498,4 +501,147 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineParserNote =>
       'Understood on your phone (AI not connected). Please check the details.';
+
+  @override
+  String get nothingPlannedToday => 'No reminders or tasks today.';
+
+  @override
+  String get exactAlarmTitle => 'Ring reminders on time?';
+
+  @override
+  String get exactAlarmBody =>
+      'Android may delay reminders by a few minutes. On the next screen, turn on \"Allow setting alarms and reminders\" for Bolo so they ring exactly on time.';
+
+  @override
+  String get exactAlarmOpen => 'Turn on';
+
+  @override
+  String get intentCall => 'Call';
+
+  @override
+  String get intentPlay => 'Play music';
+
+  @override
+  String get intentOpen => 'Open app';
+
+  @override
+  String speakCall(String name) {
+    return 'Calling $name.';
+  }
+
+  @override
+  String speakPlay(String query) {
+    return 'Playing $query.';
+  }
+
+  @override
+  String speakOpen(String app) {
+    return 'Opening $app.';
+  }
+
+  @override
+  String get wakeGreeting => 'Yes? What can I do for you?';
+
+  @override
+  String get needUnlock => 'Please unlock your phone first.';
+
+  @override
+  String appNotFound(String app) {
+    return 'I couldn\'t find an app called \"$app\".';
+  }
+
+  @override
+  String get playFailed =>
+      'I couldn\'t find a music app or YouTube on this phone.';
+
+  @override
+  String get callWho => 'Who should I call?';
+
+  @override
+  String get callButton => 'Call';
+
+  @override
+  String callNoMatch(String name) {
+    return 'I couldn\'t find \"$name\" in your contacts.';
+  }
+
+  @override
+  String get callTypeNumber => 'Or type a number';
+
+  @override
+  String get contactsPermissionNeeded =>
+      'To find people by name, allow Bolo to read your contacts. Or pick one below.';
+
+  @override
+  String callConfirmQuestion(String name) {
+    return 'Shall I call $name?';
+  }
+
+  @override
+  String get callDialerNote =>
+      'Calling isn\'t allowed, so the dialer opened with the number.';
+
+  @override
+  String get lockedHint =>
+      'Your phone is locked: Bolo is only listening. Your data stays hidden until you unlock.';
+
+  @override
+  String get assistantTitle => 'Assistant';
+
+  @override
+  String get assistantName => 'Assistant\'s name';
+
+  @override
+  String get assistantNameHint =>
+      'Call it by this name. English letters, e.g. Bolo, Robi, Mina.';
+
+  @override
+  String get assistantNameInvalid => 'Use 2–20 English letters.';
+
+  @override
+  String get assistantNameUnknown =>
+      'The offline listener doesn\'t know this word, so it couldn\'t hear it. Try another name (e.g. Bolo, Robi, Mina, Jarvis).';
+
+  @override
+  String handsFree(String name) {
+    return 'Answer when I say \"$name\"';
+  }
+
+  @override
+  String handsFreeBody(String name) {
+    return 'Say \"$name\" even when the screen is off or locked. Listening happens on this phone; nothing is recorded or sent.';
+  }
+
+  @override
+  String get sensitivity => 'How easily it hears its name';
+
+  @override
+  String get sensLow => 'Less';
+
+  @override
+  String get sensNormal => 'Normal';
+
+  @override
+  String get sensHigh => 'More';
+
+  @override
+  String get allowLockScreen => 'Appear on the lock screen';
+
+  @override
+  String get allowOverApps => 'Appear over other apps';
+
+  @override
+  String get allowButton => 'Allow';
+
+  @override
+  String get allowedLabel => 'On';
+
+  @override
+  String get handsFreeLimits =>
+      'Works while the phone is on (screen off or locked is fine), not when it is switched off. Uses a little more battery and shows a permanent notification. After restarting the phone, open Bolo once.';
+
+  @override
+  String assistantCanDo(String name) {
+    return 'Try: \"$name, call Ammu\", \"play Arijit Singh\", \"open YouTube\", \"remind me in 10 minutes to drink water\".';
+  }
 }

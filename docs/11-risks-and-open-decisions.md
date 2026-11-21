@@ -20,6 +20,9 @@
 | R15 | **Bangla TTS voice missing** on some phones | Medium | Low | Detect availability; stay silent instead of mispronouncing; Settings explains how to install the voice | Dev A |
 | R16 | **Receipt OCR can't read Bangla script** (ML Kit on-device supports Latin) | High | Low | Latin-digit totals still work; the card always asks to check; vision-AI option later with consent | Dev B |
 | R17 | Pressure to add **broad device permissions** (SMS, "all access") | Medium | High | Policy table in docs/03; each new permission needs a product purpose and a Play policy check | Lead |
+| R18 | Wake word **false alarms or misses** with real voices, accents and noise (the PC test used synthetic voices only) | Medium | Medium | Sensitivity setting; grammar with competitor words; test with 10+ real speakers and tune thresholds | Dev B |
+| R19 | **Battery drain** from the always-on listener | Medium | Medium | Off by default; small offline model; pauses while Bolo listens/speaks; measure drain on 3 phones before recommending it | Dev B |
+| R20 | **Google Play policy** for `CALL_PHONE`, `READ_CONTACTS`, microphone foreground service and full-screen intent (APK sharing is unaffected) | High | High | Tie each permission to a visible feature; prepare the Play declarations; if the full-screen intent is refused, only the heads-up notification appears | Lead |
 | R13 | **Losing the Play signing key** | Low | **Critical** | Play App Signing, two offline backups of the upload key | Lead |
 
 ## 11.2 Decisions taken in this session

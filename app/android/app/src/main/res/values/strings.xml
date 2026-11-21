@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_listening_title">Say “%1$s” to talk</string>
+    <string name="wake_listening_text">%1$s is listening for its name on this phone. Nothing is recorded or sent.</string>
+    <string name="wake_stop">Stop listening</string>
+    <string name="wake_heard_title">%1$s is here</string>
+    <string name="wake_heard_text">Tap to talk</string>
+    <string name="wake_channel_listen">Hands-free listening</string>
+    <string name="wake_channel_alert">When you call Bolo</string>
+</resources>

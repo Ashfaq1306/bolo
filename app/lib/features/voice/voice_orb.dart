@@ -83,20 +83,7 @@ class _VoiceOrbState extends State<VoiceOrb> with SingleTickerProviderStateMixin
     final sinceBlink = t - _blinkStart;
     if (sinceBlink < 0.16) {
       final closed = math.sin(sinceBlink / 0.16 * math.pi); // 0 → 1 → 0
-      faceTarget = FaceParams(
-        eyeOpen: 1 - closed,
-        eyeScale: faceTarget.eyeScale,
-        happyEyes: faceTarget.happyEyes,
-        smile: faceTarget.smile,
-        mouthOpen: faceTarget.mouthOpen,
-        mouthWidth: faceTarget.mouthWidth,
-        mouthShiftX: faceTarget.mouthShiftX,
-        browRaise: faceTarget.browRaise,
-        browTilt: faceTarget.browTilt,
-        blush: faceTarget.blush,
-        gazeX: faceTarget.gazeX,
-        gazeY: faceTarget.gazeY,
-      );
+      faceTarget = faceTarget.copyWith(eyeOpen: 1 - closed);
       _face = _face.lerpTo(faceTarget, 0.6); // blinks are fast
     } else {
       _face = _face.lerpTo(faceTarget, 0.14); // expressions ease smoothly
@@ -158,9 +145,9 @@ class _VoiceOrbState extends State<VoiceOrb> with SingleTickerProviderStateMixin
       _ => 0.0,
     };
     // Orb radius in pixels (matches baseR in the shader: 0.58 of half-size).
-    // The face is drawn a bit larger than the sphere maths suggests so it
-    // reads clearly on small phones.
-    final radius = widget.size / 2 * 0.58 * 1.25;
+    // The robot face (visor, ears, antenna) is drawn a bit larger than the
+    // sphere so it reads clearly on small phones; ears poke out the sides.
+    final radius = widget.size / 2 * 0.58 * 1.15;
     final dark = Theme.of(context).brightness == Brightness.dark;
 
     final Widget orb = (_program == null || reduceMotion)
@@ -181,6 +168,7 @@ class _VoiceOrbState extends State<VoiceOrb> with SingleTickerProviderStateMixin
         params: () => reduceMotion ? FaceParams.target(widget.expression, 0, 0, null) : _face,
         radius: radius,
         dark: dark,
+        time: () => _time.value,
         repaint: _time,
       ),
     );

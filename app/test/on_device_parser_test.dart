@@ -118,6 +118,70 @@ void main() {
     });
   });
 
+  group('assistant actions', () {
+    test('call by name, Banglish and English', () {
+      expect(p('rahim ke call koro'), containsPair('intent', 'call_contact'));
+      expect(p('rahim ke call koro')['person'], 'Rahim');
+      expect(p('call mom')['person'], 'Mom');
+      expect(p('ammu ke phone dao')['person'], 'Ammu');
+    });
+
+    test('call in Bangla and by number', () {
+      expect(p('মাকে ফোন দাও')['intent'], 'call_contact');
+      expect(p('মাকে ফোন দাও')['person'], 'মা');
+      expect(p('01712 345678 e call koro')['person'], '01712345678');
+      expect(p('০১৭১২৩৪৫৬৭৮ এ কল দাও')['person'], '01712345678');
+    });
+
+    test('"remind me to call" stays a reminder', () {
+      expect(p('kal 5 tay rahim ke call korte mone koriye dio')['intent'], 'create_reminder');
+    });
+
+    test('play music with a query', () {
+      final r = p('arijit singh er gaan bajao');
+      expect(r['intent'], 'play_media');
+      expect(r['title'], 'arijit singh');
+      expect(p('play shape of you')['title'], 'shape of you');
+      expect(p('একটা গান বাজাও')['intent'], 'play_media');
+    });
+
+    test('open an app', () {
+      expect(p('youtube kholo'), containsPair('intent', 'open_app'));
+      expect(p('youtube kholo')['title'], 'youtube');
+      expect(p('open whatsapp')['title'], 'whatsapp');
+    });
+
+    test('actions never carry money', () {
+      expect(p('rahim ke 500 taka er jonno call koro')['amount'], isNull);
+    });
+  });
+
+  group('cleaner titles and relative times', () {
+    test('reminder title drops date, time and "remind me"', () {
+      expect(p('kal sokal 10 tay rent dite hobe mone koriye dio')['title'], 'rent dite hobe');
+      expect(p('আজ বিকাল ৪টায় মিটিং মনে করিয়ে দিও')['title'], 'মিটিং');
+    });
+
+    test('expense title is just the thing', () {
+      expect(p('aaj lunch e 350 taka khoroch holo')['title'], 'lunch');
+      expect(p('রিকশা ভাড়া ৮০ টাকা খরচ')['title'], 'রিকশা ভাড়া');
+    });
+
+    test('"in 10 minutes" / "১০ মিনিট পরে"', () {
+      final r = p('10 minute pore pani khete mone koriye dio');
+      expect(r['date'], '2026-11-19');
+      expect(r['time'], '14:25');
+      expect(r['title'], 'pani khete');
+      expect(p('১০ মিনিট পরে পানি খেতে মনে করিয়ে দিও')['time'], '14:25');
+      expect(p('remind me in 2 hours to call abbu')['time'], '16:15');
+      expect(p('adha ghonta pore meeting mone koriye dio')['time'], '14:45');
+    });
+
+    test('settle finds the person at the start', () {
+      expect(p('rahim taka ferot dise')['person'], 'Rahim');
+    });
+  });
+
   group('FallbackCommandService', () {
     test('uses the on-device parser when the server fails', () async {
       final svc = FallbackCommandService(_FailingService(ParseFailure.server), clock: () => now);

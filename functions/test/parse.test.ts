@@ -170,3 +170,40 @@ describe("amount cross-check", () => {
     expect(r.confidence).toBe(0.5);
   });
 });
+
+describe("assistant action intents", () => {
+  it("never keep an amount on call/play/open", () => {
+    const now = new Date("2026-11-19T14:15:00Z");
+    const out = sanitize(
+      {
+        intent: "call_contact",
+        confidence: 0.9,
+        title: null,
+        amount: 500,
+        person: "Rahim",
+        category: null,
+        date: null,
+        time: null,
+        ambiguity: "none",
+        alternatives: [],
+        reminderOffsetMinutes: null,
+        repeat: "none",
+        clarification: null,
+        language: "mixed",
+      },
+      now,
+      "rahim ke 500 taka er jonno call koro",
+    );
+    expect(out.intent).toBe("call_contact");
+    expect(out.amount).toBeNull();
+    expect(out.person).toBe("Rahim");
+  });
+
+  it("the mock understands call / play / open", () => {
+    const cal = buildCalendar(new Date("2026-11-19T14:15:00Z"));
+    expect(mockParse("rahim ke call koro", cal)).toMatchObject({ intent: "call_contact", person: "Rahim" });
+    expect(mockParse("arijit singh er gaan bajao", cal)).toMatchObject({ intent: "play_media", title: "arijit singh" });
+    expect(mockParse("youtube kholo", cal)).toMatchObject({ intent: "open_app", title: "youtube" });
+    expect(mockParse("kal 5 tay rahim ke call korte mone koriye dio", cal).intent).toBe("create_reminder");
+  });
+});

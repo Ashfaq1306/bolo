@@ -7,7 +7,9 @@ import '../../core/bangla_digits.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/depth_card.dart';
 import '../../l10n/app_localizations.dart';
+import '../assistant/assistant_settings_card.dart';
 import '../command/capture_controller.dart';
+import '../command/confirmation_sheet.dart';
 import '../records/models.dart';
 import '../update/update_prompt.dart';
 
@@ -78,11 +80,13 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (h) async {
                 if (h == null) return;
                 await ref.read(summaryHourProvider.notifier).set(h);
-                if (h >= 0) await ref.read(reminderSchedulerProvider).requestPermissions();
+                if (h >= 0 && context.mounted) await ensureReminderPermissions(context, ref);
               },
             ),
           ]),
         ),
+        const SizedBox(height: 12),
+        const AssistantSettingsCard(),
         const SizedBox(height: 12),
         DepthCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -14,6 +14,9 @@ extension BoloLabels on AppLocalizations {
         CommandIntent.addPayable => intentPayable,
         CommandIntent.settleLedger => intentSettle,
         CommandIntent.querySummary => intentSummary,
+        CommandIntent.callContact => intentCall,
+        CommandIntent.playMedia => intentPlay,
+        CommandIntent.openApp => intentOpen,
         CommandIntent.unknown => intentUnknown,
       };
 
@@ -61,6 +64,9 @@ IconData intentIcon(CommandIntent i) => switch (i) {
       CommandIntent.addPayable => Icons.call_made_rounded,
       CommandIntent.settleLedger => Icons.handshake_rounded,
       CommandIntent.querySummary => Icons.insights_rounded,
+      CommandIntent.callContact => Icons.call_rounded,
+      CommandIntent.playMedia => Icons.music_note_rounded,
+      CommandIntent.openApp => Icons.apps_rounded,
       CommandIntent.unknown => Icons.help_outline_rounded,
     };
 

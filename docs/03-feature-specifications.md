@@ -187,18 +187,43 @@ Every field on the card is editable inline: title, amount, person, date, time, c
 
 ## Device access policy
 
-Bolo asks for **purpose-specific** access only, at the moment of use, and prefers system pickers that need no permission:
+Bolo asks for **purpose-specific** access only, at the moment of use, and prefers system pickers that need no permission. In v1.1 the user asked for a real phone assistant (calls, music, "Bolo" hands-free), so the table grew. Each new item is still tied to one feature the user switches on or asks for by voice.
 
-| Capability | Permission | Status |
+| Capability | Permission | When it is asked | Status |
+|---|---|---|---|
+| Microphone (voice input) | `RECORD_AUDIO` | first tap on the robot | ✅ |
+| Notifications / exact alarms | `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM` | first reminder (with an explanation first) | ✅ |
+| Voice replies | none | | ✅ |
+| Contacts: pick one | none (system picker) | | ✅ |
+| **Contacts: find by name** ("rahim ke call koro") | `READ_CONTACTS` | first voice call by name; the search runs on the phone, names are never uploaded | ✅ v1.1 |
+| **Place a call** | `CALL_PHONE` | first call; if refused, the dialer opens with the number instead | ✅ v1.1 |
+| **Play music / open apps** | none (standard intents; launcher apps visible via `<queries>`) | | ✅ v1.1 |
+| **Hands-free wake word ("Bolo")** | `FOREGROUND_SERVICE_MICROPHONE` + permanent notification | only when the user switches it on in Settings | ✅ v1.1 |
+| **Appear when called** | `USE_FULL_SCREEN_INTENT`, `SYSTEM_ALERT_WINDOW` (user grants in Android settings) | from the hands-free card | ✅ v1.1 |
+| Calendar | none (calendar app intent) | | ✅ |
+| Camera (receipts) | none (camera app intent) | | ✅ |
+| **SMS (bKash/Nagad transaction SMS)** | `READ_SMS` is a Google Play *restricted* permission | | ❌ Not added. Needs a separate Play policy review |
+| Call logs, location, files/photos, accessibility service, "all access" | restricted, or no product purpose | | ❌ Will not be added |
+
+### Hands-free wake word (F19)
+
+- **Engine:** [Vosk](https://alphacephei.com/vosk/) `vosk-model-small-en-us-0.15` (Apache 2.0), fully **offline** on the phone. Audio is processed in memory and dropped; nothing is recorded or sent.
+- **Grammar spotting:** the recogniser may only output the name, about 30 common "competitor" words, or `[unk]`, and the name must reach a confidence of 0.6 (Normal), 0.75 (Less) or 0.5 (More).
+- **Measured on the PC** (synthetic voices David/Zira, 26 clips): 11/11 wake phrases detected ("Bolo", "Hey Bolo", "Okay Bolo, call mom"), **0/15 false alarms** ("hello", "below", "polo shirt", "bowl of rice", "hollow", "volume", ...). Real voices, accents and noise will differ: test on phones and adjust the sensitivity.
+- **Custom names:** any English word in the model's vocabulary works (Bolo, Robi, Mina, Rahim, Jarvis...). Unknown words are rejected in Settings, because they could never be heard.
+- **When it hears the name:** it vibrates, wakes the screen and opens Bolo (over the lock screen if locked, in a privacy mode that shows no data). Bolo says "জি, বলুন" and listens. Calls, music and apps require unlocking first. The session ends after 30 s idle, and the listener resumes.
+- **Limits (told to users):** does not work when the phone is switched off; uses more battery; Android forbids starting a microphone service at boot, so after a restart the user opens Bolo once.
+
+### Assistant actions (F20)
+
+| Say | Intent | What happens |
 |---|---|---|
-| Microphone (voice input) | `RECORD_AUDIO`, asked on first tap | ✅ |
-| Notifications / exact alarms | `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM` | ✅ |
-| Voice replies | none | ✅ |
-| Contacts | none (system picker) | ✅ |
-| Calendar | none (calendar app intent) | ✅ |
-| Camera (receipts) | none (camera app intent) | ✅ |
-| **SMS (bKash/Nagad transaction SMS)** | `READ_SMS` is a Google Play *restricted* permission | ❌ Not added. Needs a separate Play policy review before any work |
-| Call logs, background location, "all access" | restricted / no product purpose | ❌ Will not be added |
+| "rahim ke call koro", "মাকে ফোন দাও", "01712… e call koro" | `call_contact` | Contacts are searched on the phone (family words: Ammu/Amma/Ma/Mom…). The call card asks "রহিমকে কল করবো?" and listens for হ্যাঁ/না (or a tap). **A call is never placed without a confirmation.** |
+| "arijit singh er gaan bajao", "play shape of you" | `play_media` | Android's play-from-search intent (Spotify, YouTube Music…), falling back to a YouTube search |
+| "youtube kholo", "open whatsapp" | `open_app` | Opens the best-matching installed app |
+| "10 minute pore pani khete mone koriye dio" | `create_reminder` | Relative times are supported |
+
+"Remind me to call X" stays a reminder, not a call.
 
 ---
 

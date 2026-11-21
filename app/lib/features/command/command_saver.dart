@@ -117,7 +117,7 @@ class CommandSaver {
         await repo.settleLedgerEntry(settleEntryId);
         return SaveResult(Collections.ledger, settleEntryId);
 
-      case CommandIntent.querySummary || CommandIntent.unknown:
+      case CommandIntent.querySummary || CommandIntent.unknown || CommandIntent.callContact || CommandIntent.playMedia || CommandIntent.openApp:
         throw DraftInvalid([DraftProblem.notSavable]);
     }
   }

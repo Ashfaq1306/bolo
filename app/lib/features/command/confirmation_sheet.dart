@@ -38,11 +38,41 @@ Future<void> showConfirmationSheet(BuildContext context, WidgetRef ref, ParsedCo
   messenger.showSnackBar(SnackBar(
     content: Text(l.saved),
     duration: const Duration(seconds: 5),
+    // Newer Flutter keeps snackbars with an action on screen forever unless
+    // told otherwise; that hid the + button and never went away.
+    persist: false,
     // Undo is offered only for non-financial records (docs/03 § F4).
     action: financial
         ? null
         : SnackBarAction(label: l.undo, onPressed: () => ref.read(commandSaverProvider)?.undo(saved)),
   ));
+}
+
+/// Notification permission, then (once) a short explanation before opening
+/// Android's "Alarms & reminders" page, so reminders ring on the exact minute.
+Future<void> ensureReminderPermissions(BuildContext context, WidgetRef ref) async {
+  final scheduler = ref.read(reminderSchedulerProvider);
+  await scheduler.requestPermissions();
+  if (await scheduler.exactAlarmsAllowed()) return;
+  final prefs = ref.read(sharedPreferencesProvider);
+  const key = 'settings.exactAlarmExplained';
+  if (prefs.getBool(key) ?? false) return;
+  await prefs.setBool(key, true);
+  if (!context.mounted) return;
+  final l = AppLocalizations.of(context);
+  final open = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      icon: const Icon(Icons.alarm_on_rounded, size: 36),
+      title: Text(l.exactAlarmTitle),
+      content: Text(l.exactAlarmBody),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.updateLater)),
+        FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l.exactAlarmOpen)),
+      ],
+    ),
+  );
+  if (open == true) await scheduler.openExactAlarmSettings();
 }
 
 class ConfirmationSheet extends ConsumerStatefulWidget {
@@ -162,6 +192,14 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
       if (ok != true) return;
     }
 
+    // Ask for reminder permissions BEFORE saving, so the alarm is scheduled
+    // in the right (exact) mode the first time.
+    if (_draft.intent == CommandIntent.createReminder || _draft.remindBefore) {
+      if (!mounted) return;
+      await ensureReminderPermissions(context, ref);
+      if (!mounted) return;
+    }
+
     setState(() => _saving = true);
     try {
       // userConfirmed is true ONLY because this runs from a button the user tapped.
@@ -169,9 +207,6 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
       final at = _draft.instant;
       if (_addToCalendar && at != null) {
         await addToPhoneCalendar(title: _draft.title.trim(), start: at, description: 'বলো · Bolo');
-      }
-      if (_draft.intent == CommandIntent.createReminder || _draft.remindBefore) {
-        await ref.read(reminderSchedulerProvider).requestPermissions();
       }
       if (mounted) Navigator.pop(context, (result, _draft.intent.isFinancial));
     } on DraftInvalid {
@@ -433,7 +468,7 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
             ]),
           ),
         ];
-      case CommandIntent.querySummary || CommandIntent.unknown:
+      case CommandIntent.querySummary || CommandIntent.unknown || CommandIntent.callContact || CommandIntent.playMedia || CommandIntent.openApp:
         return [Text(l.notUnderstood, style: theme.textTheme.bodyMedium)];
     }
   }

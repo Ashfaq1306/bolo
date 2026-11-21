@@ -131,8 +131,8 @@ abstract class AppLocalizations {
   /// No description provided for @tapToSpeak.
   ///
   /// In en, this message translates to:
-  /// **'Tap the orb and speak'**
-  String get tapToSpeak;
+  /// **'Tap {name} and speak'**
+  String tapToSpeak(String name);
 
   /// No description provided for @orbLabel.
   ///
@@ -605,8 +605,8 @@ abstract class AppLocalizations {
   /// No description provided for @nothingToday.
   ///
   /// In en, this message translates to:
-  /// **'Nothing for today yet. Tap the orb and tell me something.'**
-  String get nothingToday;
+  /// **'Nothing for today yet. Tap {name} and tell me something.'**
+  String nothingToday(String name);
 
   /// No description provided for @tasksTitle.
   ///
@@ -923,7 +923,7 @@ abstract class AppLocalizations {
   /// No description provided for @devicePowersBody.
   ///
   /// In en, this message translates to:
-  /// **'Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.'**
+  /// **'Bolo only uses what you ask for: contacts are searched on the phone when you ask it to call someone (names are never uploaded), calls need your confirmation, music and apps open in their own apps, receipts are read on the phone and the photo is deleted. The only background access is the optional \"Bolo\" listener, which runs on the phone and shows a notification while on.'**
   String get devicePowersBody;
 
   /// No description provided for @updateTitle.
@@ -991,6 +991,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Understood on your phone (AI not connected). Please check the details.'**
   String get offlineParserNote;
+
+  /// No description provided for @nothingPlannedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders or tasks today.'**
+  String get nothingPlannedToday;
+
+  /// No description provided for @exactAlarmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ring reminders on time?'**
+  String get exactAlarmTitle;
+
+  /// No description provided for @exactAlarmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Android may delay reminders by a few minutes. On the next screen, turn on \"Allow setting alarms and reminders\" for Bolo so they ring exactly on time.'**
+  String get exactAlarmBody;
+
+  /// No description provided for @exactAlarmOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get exactAlarmOpen;
+
+  /// No description provided for @intentCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get intentCall;
+
+  /// No description provided for @intentPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play music'**
+  String get intentPlay;
+
+  /// No description provided for @intentOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open app'**
+  String get intentOpen;
+
+  /// No description provided for @speakCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling {name}.'**
+  String speakCall(String name);
+
+  /// No description provided for @speakPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing {query}.'**
+  String speakPlay(String query);
+
+  /// No description provided for @speakOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening {app}.'**
+  String speakOpen(String app);
+
+  /// No description provided for @wakeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes? What can I do for you?'**
+  String get wakeGreeting;
+
+  /// No description provided for @needUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Please unlock your phone first.'**
+  String get needUnlock;
+
+  /// No description provided for @appNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t find an app called \"{app}\".'**
+  String appNotFound(String app);
+
+  /// No description provided for @playFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t find a music app or YouTube on this phone.'**
+  String get playFailed;
+
+  /// No description provided for @callWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Who should I call?'**
+  String get callWho;
+
+  /// No description provided for @callButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get callButton;
+
+  /// No description provided for @callNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t find \"{name}\" in your contacts.'**
+  String callNoMatch(String name);
+
+  /// No description provided for @callTypeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type a number'**
+  String get callTypeNumber;
+
+  /// No description provided for @contactsPermissionNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'To find people by name, allow Bolo to read your contacts. Or pick one below.'**
+  String get contactsPermissionNeeded;
+
+  /// No description provided for @callConfirmQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Shall I call {name}?'**
+  String callConfirmQuestion(String name);
+
+  /// No description provided for @callDialerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling isn\'t allowed, so the dialer opened with the number.'**
+  String get callDialerNote;
+
+  /// No description provided for @lockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone is locked: Bolo is only listening. Your data stays hidden until you unlock.'**
+  String get lockedHint;
+
+  /// No description provided for @assistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get assistantTitle;
+
+  /// No description provided for @assistantName.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant\'s name'**
+  String get assistantName;
+
+  /// No description provided for @assistantNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Call it by this name. English letters, e.g. Bolo, Robi, Mina.'**
+  String get assistantNameHint;
+
+  /// No description provided for @assistantNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 2–20 English letters.'**
+  String get assistantNameInvalid;
+
+  /// No description provided for @assistantNameUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The offline listener doesn\'t know this word, so it couldn\'t hear it. Try another name (e.g. Bolo, Robi, Mina, Jarvis).'**
+  String get assistantNameUnknown;
+
+  /// No description provided for @handsFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer when I say \"{name}\"'**
+  String handsFree(String name);
+
+  /// No description provided for @handsFreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Say \"{name}\" even when the screen is off or locked. Listening happens on this phone; nothing is recorded or sent.'**
+  String handsFreeBody(String name);
+
+  /// No description provided for @sensitivity.
+  ///
+  /// In en, this message translates to:
+  /// **'How easily it hears its name'**
+  String get sensitivity;
+
+  /// No description provided for @sensLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get sensLow;
+
+  /// No description provided for @sensNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get sensNormal;
+
+  /// No description provided for @sensHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get sensHigh;
+
+  /// No description provided for @allowLockScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Appear on the lock screen'**
+  String get allowLockScreen;
+
+  /// No description provided for @allowOverApps.
+  ///
+  /// In en, this message translates to:
+  /// **'Appear over other apps'**
+  String get allowOverApps;
+
+  /// No description provided for @allowButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get allowButton;
+
+  /// No description provided for @allowedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get allowedLabel;
+
+  /// No description provided for @handsFreeLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'Works while the phone is on (screen off or locked is fine), not when it is switched off. Uses a little more battery and shows a permanent notification. After restarting the phone, open Bolo once.'**
+  String get handsFreeLimits;
+
+  /// No description provided for @assistantCanDo.
+  ///
+  /// In en, this message translates to:
+  /// **'Try: \"{name}, call Ammu\", \"play Arijit Singh\", \"open YouTube\", \"remind me in 10 minutes to drink water\".'**
+  String assistantCanDo(String name);
 }
 
 class _AppLocalizationsDelegate

@@ -11,3 +11,11 @@
 # flutter_local_notifications stores scheduled reminders with Gson and
 # re-reads them after a reboot; keep its model classes intact.
 -keep class com.dexterous.** { *; }
+
+# Vosk (wake word) talks to its native library through JNA, which uses
+# reflection: keep both intact.
+-keep class com.sun.jna.** { *; }
+-keep class * implements com.sun.jna.** { *; }
+-keep class org.vosk.** { *; }
+-keep interface bd.bolo.bolo_app.WakeModel$VoskExtra { *; }
+-dontwarn java.awt.**

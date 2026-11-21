@@ -32,3 +32,6 @@ functions/eval/results/
 
 # Built APKs (published on GitHub Releases, not committed)
 dist/
+
+# Offline wake word model (downloaded by scripts/fetch-wake-model.ps1, ~40 MB)
+app/android/app/src/main/assets/vosk-model-en/

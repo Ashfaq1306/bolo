@@ -18,6 +18,9 @@ INTENTS
 - add_payable: the USER owes someone money ("dite hobe", "ধার নিলাম" = I borrowed, "I owe").
 - settle_ledger: a debt was paid back ("taka diye diyeche", "শোধ করেছি", "paid back").
 - query_summary: the user asks about their day, spending, or what is owed.
+- call_contact: phone someone now ("rahim ke call koro", "মাকে ফোন দাও", "call mom"). person = who to call as said (a name, a family word like "Ammu", or a phone number with digits only). A request to be REMINDED to call later is create_reminder, not call_contact.
+- play_media: play music or a song now ("gaan bajao", "arijit singh er gaan chalao", "play shape of you"). title = what to play (song/artist/genre) without the verb, or "" if nothing specific.
+- open_app: open an app on the phone ("youtube kholo", "open whatsapp"). title = the app name only.
 - unknown: none of the above, or impossible to tell.
 
 FIELDS
@@ -38,6 +41,7 @@ DATES AND TIMES (the most important part)
 - "25 tarikh"/"২৫ তারিখ": this month if still ahead, otherwise next month.
 - Time-of-day words fix AM/PM: sokal/সকাল 5-11 → AM; dupur/দুপুর 12-14; bikal/বিকাল 15-17; shondha/সন্ধ্যা 18-19; rat/রাত 20-23 (or 0-4 when "rat 1 tay"/"after midnight").
 - A bare hour 1-11 without a time-of-day word or am/pm ("5 tay", "৫টায়") is ambiguous: set ambiguity = "am_pm", choose the reading most plausible for daily life (prefer 07:00-22:00 and a time that is still in the future), and put the other reading in alternatives.
+- Relative times ("10 minute pore", "১০ মিনিট পরে", "in 2 hours", "adha ghonta pore" = 30 minutes): add them to the current Dhaka time given in the message.
 - If a reminder needs a date and none is said, use today if the time is still ahead today, otherwise tomorrow. If neither a date nor a time is said for a reminder, set ambiguity = "missing_date" and date/time null.
 - Expenses with no date: today. Tasks with no date: date null.
 - Output date as YYYY-MM-DD and time as HH:mm (24h). Never output time zones or offsets.
@@ -50,6 +54,8 @@ EXAMPLES (today = Thursday 2026-11-19, 20:15)
 "kal sokal 10 tay rent dite hobe mone koriye dio" → create_reminder, title "rent dite hobe", date 2026-11-20, time 10:00, ambiguity none.
 "aaj lunch e 350 taka khoroch holo" → add_expense, amount 350, category food, title "lunch", date 2026-11-19.
 "Karim amar kache 2000 taka pay, shukrobar dibe" → add_receivable, person "Karim", amount 2000, date 2026-11-20, ambiguity none.
+"ammu ke phone dao" → call_contact, person "Ammu", amount null.
+"arijit singh er gaan bajao" → play_media, title "arijit singh".
 "রহিমকে ৫টায় পাঁচশো টাকা দিতে হবে কাল" → add_payable, person "রহিম", amount 500, date 2026-11-20, time 17:00, ambiguity am_pm, alternatives [{2026-11-20, 05:00}], clarification "বিকাল ৫টা নাকি সকাল ৫টা?".`;
 
 export function buildUserMessage(text: string, cal: DhakaCalendar, locale: string): string {

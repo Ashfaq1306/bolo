@@ -27,6 +27,9 @@ String spokenSummary(ParsedCommand c, AppLocalizations l, String languageCode) {
     CommandIntent.addReceivable => l.speakReceivable(c.person, amount()),
     CommandIntent.addPayable => l.speakPayable(c.person, amount()),
     CommandIntent.settleLedger => l.speakSettle(c.person),
+    CommandIntent.callContact => l.speakCall(c.person),
+    CommandIntent.playMedia => l.speakPlay(c.title),
+    CommandIntent.openApp => l.speakOpen(c.title),
     CommandIntent.querySummary || CommandIntent.unknown => l.speakUnknown,
   };
   final question = c.clarification;

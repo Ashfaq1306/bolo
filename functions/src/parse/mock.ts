@@ -38,6 +38,15 @@ export function mockParse(raw: string, cal: DhakaCalendar): AiCommand {
   if (/remind|mone kor|মনে করি/.test(text)) {
     return { ...base, intent: "create_reminder", date, time: time ?? "09:00" };
   }
+  const callee = /([a-z]+) (?:ke )?(?:call|phone|fon) (?:koro|dao|kor)/.exec(text) ?? /\bcall ([a-z]+)/.exec(text);
+  if (callee) return { ...base, intent: "call_contact", person: callee[1][0].toUpperCase() + callee[1].slice(1) };
+  if (/(gaan|gan|song|গান).*(bajao|chalao|play|বাজাও)|\bplay\s/.test(text)) {
+    const what = text.replace(/\b(gaan|gan|song|bajao|chalao|play|er|ekta)\b/g, " ").replace(/\s+/g, " ").trim();
+    return { ...base, intent: "play_media", title: what };
+  }
+  if (/\b(kholo|open)\b/.test(text)) {
+    return { ...base, intent: "open_app", title: text.replace(/\b(kholo|open|app)\b/g, " ").trim() };
+  }
   if (/khoroch|spent|খরচ|kinlam/.test(text) && amount) {
     return { ...base, intent: "add_expense", amount, category: /lunch|khabar|খাবার|dinner/.test(text) ? "food" : "other", date: cal.today };
   }

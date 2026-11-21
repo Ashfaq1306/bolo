@@ -34,7 +34,9 @@ export function sanitize(ai: AiCommand, now: Date, text?: string): ParseResponse
   const date = isRealDate(ai.date, now) ? ai.date : null;
   const time = isRealTime(ai.time) ? ai.time : null;
 
+  const isAction = ai.intent === "call_contact" || ai.intent === "play_media" || ai.intent === "open_app";
   const amount =
+    !isAction &&
     typeof ai.amount === "number" && Number.isFinite(ai.amount) && ai.amount > 0 && ai.amount <= MAX_AMOUNT_TAKA
       ? Math.round(ai.amount * 100) / 100
       : null;

@@ -9,7 +9,16 @@ import '../records/models.dart';
 /// Android system (AlarmManager) delivers them, not a server.
 abstract class ReminderScheduler {
   Future<void> init();
+  /// Asks for the notification permission (Android 13+) and refreshes
+  /// whether exact alarms are allowed. Does NOT open any settings page.
   Future<bool> requestPermissions();
+
+  /// Whether Android lets Bolo ring reminders at the exact minute.
+  Future<bool> exactAlarmsAllowed();
+
+  /// Opens Android's "Alarms & reminders" page for Bolo (Android 12+).
+  /// The UI explains why first; call [requestPermissions] after returning.
+  Future<void> openExactAlarmSettings();
   Future<void> scheduleReminder(Reminder reminder);
   Future<void> scheduleTask(TaskItem task);
   Future<void> scheduleDailySummary({required int hour, required String title, required String body});
@@ -50,7 +59,7 @@ class LocalReminderScheduler implements ReminderScheduler {
   Future<void> init() async {
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings('@drawable/ic_stat_bolo'),
       ),
     );
     _exactAllowed = await _android?.canScheduleExactNotifications() ?? false;
@@ -59,11 +68,20 @@ class LocalReminderScheduler implements ReminderScheduler {
   @override
   Future<bool> requestPermissions() async {
     final granted = await _android?.requestNotificationsPermission() ?? false;
-    if (!(await _android?.canScheduleExactNotifications() ?? false)) {
-      await _android?.requestExactAlarmsPermission();
-    }
     _exactAllowed = await _android?.canScheduleExactNotifications() ?? false;
     return granted;
+  }
+
+  @override
+  Future<bool> exactAlarmsAllowed() async {
+    _exactAllowed = await _android?.canScheduleExactNotifications() ?? false;
+    return _exactAllowed;
+  }
+
+  @override
+  Future<void> openExactAlarmSettings() async {
+    await _android?.requestExactAlarmsPermission();
+    _exactAllowed = await _android?.canScheduleExactNotifications() ?? false;
   }
 
   /// Exact if Android allows it; otherwise inexact (may be a few minutes late).
@@ -131,6 +149,9 @@ class LocalReminderScheduler implements ReminderScheduler {
 
   @override
   Future<void> resync({required List<Reminder> reminders, required List<TaskItem> tasks}) async {
+    // The user may have allowed exact alarms since last time: re-schedule
+    // everything in the best mode available now.
+    _exactAllowed = await _android?.canScheduleExactNotifications() ?? false;
     for (final r in reminders) {
       if (!r.done) await scheduleReminder(r);
     }
@@ -147,6 +168,10 @@ class NoopReminderScheduler implements ReminderScheduler {
   Future<void> init() async {}
   @override
   Future<bool> requestPermissions() async => true;
+  @override
+  Future<bool> exactAlarmsAllowed() async => true;
+  @override
+  Future<void> openExactAlarmSettings() async {}
   @override
   Future<void> scheduleReminder(Reminder r) async => scheduled.add(r.notificationId);
   @override

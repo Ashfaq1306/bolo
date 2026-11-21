@@ -9,6 +9,8 @@ import '../../core/providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets/depth_card.dart';
 import '../../l10n/app_localizations.dart';
+import '../assistant/assistant_actions.dart';
+import '../assistant/assistant_settings.dart';
 import '../command/capture_controller.dart';
 import '../command/confirmation_sheet.dart';
 import '../command/parsed_command.dart';
@@ -20,7 +22,11 @@ import '../records/models.dart';
 import '../voice/voice_orb.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.privacy = false});
+
+  /// Shown over the lock screen after "Bolo!": only the robot and what it
+  /// hears; no totals, reminders or other personal data.
+  final bool privacy;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -72,6 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final capture = ref.watch(captureControllerProvider);
     final now = ref.watch(clockProvider)();
     final mood = ref.watch(faceMoodProvider);
+    final name = assistantDisplayName(ref.watch(assistantNameProvider), lang);
 
     // Open the confirmation card once per new proposal, and say it out loud.
     ref.listen(captureControllerProvider, (prev, next) {
@@ -81,11 +88,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ref.read(faceMoodProvider.notifier).flash(FaceExpression.happy);
           return; // the summary is right here on this screen
         }
+        ref.read(wakeSessionProvider.notifier).touch();
+        if (proposal.intent.isAction) {
+          // Call / play / open: do it (the call sheet confirms first).
+          runAssistantAction(context, ref, proposal);
+          return;
+        }
         if (proposal.intent == CommandIntent.unknown) {
           ref.read(faceMoodProvider.notifier).flash(FaceExpression.confused);
         }
         _speak(spokenSummary(proposal, l, lang));
-        showConfirmationSheet(context, ref, proposal);
+        showConfirmationSheet(context, ref, proposal).then((_) => ref.read(wakeSessionProvider.notifier).touch(idle: const Duration(seconds: 4)));
       } else if (next.message != CaptureMessage.none && next.message != prev?.message) {
         ref.read(faceMoodProvider.notifier).flash(FaceExpression.confused);
       }
@@ -105,7 +118,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final status = switch (capture.phase) {
       CapturePhase.listening => capture.transcript.isEmpty ? l.listening : capture.transcript,
       CapturePhase.thinking => l.thinking,
-      CapturePhase.idle => capture.message != CaptureMessage.none ? _message(l, capture.message) : l.tapToSpeak,
+      CapturePhase.idle => capture.message != CaptureMessage.none ? _message(l, capture.message) : l.tapToSpeak(name),
     };
     final speechLocale = ref.watch(speechLocaleProvider);
 
@@ -177,7 +190,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(alignment: WrapAlignment.center, spacing: 8, children: [
+              if (!widget.privacy) Wrap(alignment: WrapAlignment.center, spacing: 8, children: [
                 TextButton.icon(
                   onPressed: capture.phase == CapturePhase.idle ? () => _typeCommand(context) : null,
                   icon: const Icon(Icons.keyboard_rounded),
@@ -192,7 +205,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 8),
             ]),
           ),
-          const SliverPadding(padding: EdgeInsets.fromLTRB(16, 0, 16, 24), sliver: SliverToBoxAdapter(child: TodaySummaryView())),
+          if (!widget.privacy)
+            const SliverPadding(padding: EdgeInsets.fromLTRB(16, 0, 16, 24), sliver: SliverToBoxAdapter(child: TodaySummaryView()))
+          else
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(l.lockedHint, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+              ),
+            ),
         ]),
       ),
     ]),
@@ -294,7 +315,12 @@ class TodaySummaryView extends ConsumerWidget {
       ]),
       const SizedBox(height: 12),
       if (s.remindersToday.isEmpty && s.tasksDueOrOverdue.isEmpty)
-        DepthCard(child: Text(l.nothingToday, textAlign: TextAlign.center))
+        DepthCard(
+          child: Text(
+            s.isEmpty ? l.nothingToday(assistantDisplayName(ref.watch(assistantNameProvider), lang)) : l.nothingPlannedToday,
+            textAlign: TextAlign.center,
+          ),
+        )
       else ...[
         if (s.remindersToday.isNotEmpty)
           DepthCard(

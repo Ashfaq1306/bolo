@@ -16,9 +16,10 @@ Speak naturally in Bangla, English, or a mix. Bolo turns the sentence into a rem
 ## Features
 
 - 🎙️ **Voice or typed input**, with a live transcript and a GPU-shader **3D orb** that reacts to your voice
-- 😊 **Bolo has a face**: eyes that blink and follow your finger, a nose, and a mouth that moves with your voice. It looks curious while listening, thoughtful while thinking, happy after saving, and confused when it doesn't understand
+- 🤖 **Cute robot face:** LED eyes in a glass visor that blink, follow your finger and turn into loading rings while thinking; headphone ears; an antenna that pulses while listening; and an LED equalizer mouth that moves with your voice
 - 🔊 **Talks back** in Bangla or English with the phone's own voice
-- 📇 **Contacts, 📅 calendar, 🧾 receipt scan**, all without extra permissions: system pickers, a calendar intent, and on-device text recognition (the photo is deleted right after)
+- 🤖 **A real phone assistant:** say "Bolo" (or your own name for it) even with the screen off or locked. It wakes up, asks "জি, বলুন", and can **call people** ("ammu ke phone dao", with confirmation), **play music** ("arijit singh er gaan bajao"), **open apps** ("youtube kholo"), and set reminders ("10 minute pore..."). The wake word runs **offline on the phone** (Vosk); nothing is recorded
+- 📅 **Calendar, 🧾 receipt scan:** a calendar intent and on-device text recognition (the photo is deleted right after)
 - 🧠 **Intent and field extraction** for reminders, tasks/deadlines, expenses, receivables/payables, settling, and summaries
 - ✅ **Confirmation card**: everything is editable, and **money is never saved without an explicit Confirm**
 - 🕐 **Asia/Dhaka time** everywhere, with ambiguity handling for "৫টায়" (5 o'clock, but AM or PM?) and "kal" (yesterday or tomorrow?)
@@ -31,7 +32,7 @@ Speak naturally in Bangla, English, or a mix. Bolo turns the sentence into a rem
 
 **Download:** <https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo.apk>. This link always points to the newest version, so it's the one to share.
 
-Open the file on the phone and tap **Install**. If Android asks, allow "Install unknown apps" for your browser.
+(Very old 32-bit phones: `bolo-armv7.apk` from the same release page.) Open the file on the phone and tap **Install**. If Android asks, allow "Install unknown apps" for your browser.
 
 **Updates are automatic to offer:** every time Bolo opens, it checks Firebase Remote Config. If a newer build exists, it shows **Update available**; one tap downloads it, and Android asks you to install it. Your data is kept, because it lives in your account. Android never lets an app replace itself without that final tap.
 

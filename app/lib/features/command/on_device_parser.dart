@@ -25,6 +25,13 @@ Map<String, dynamic> parseOnDevice(String raw, DateTime now) {
   var intent = 'unknown';
   if (has(r'remind|mone kor|mone koriye|মনে কর|মনে করি|alarm|reminder|যেন ভুলে না')) {
     intent = 'create_reminder';
+  } else if (has(_callPattern)) {
+    // Assistant actions. ("Remind me to call X" stays a reminder: checked above.)
+    intent = 'call_contact';
+  } else if (has(_playPattern)) {
+    intent = 'play_media';
+  } else if (has(_openPattern)) {
+    intent = 'open_app';
   } else if (has(r'shodh|শোধ|ferot (dilo|dise|diyeche)|ফেরত (দিল|দিয়েছে|দিসে)|paid back|settle|returned')) {
     intent = 'settle_ledger';
   } else if (amount != null && has(r'pabo|পাব|owes me|dhar dilam|dhar disi|ধার দিলাম|ধার দিয়েছি|ধার দিসি|amake .{0,30}(dibe|debe|diben|dite hobe|ferot dibe)|আমাকে .{0,30}(দিবে|দেবে|দিবেন|দিতে হবে)')) {
@@ -92,6 +99,16 @@ Map<String, dynamic> parseOnDevice(String raw, DateTime now) {
     }
   }
 
+  // "10 minute pore", "in 2 hours", "আধা ঘণ্টা পরে": relative to now.
+  final rel = _relativeMinutes(text);
+  if (rel != null && (intent == 'create_reminder' || intent == 'create_task')) {
+    final at = today.add(Duration(minutes: rel));
+    date = DhakaTime.isoDate(at);
+    time = _hm(at.hour, at.minute);
+    ambiguity = 'none';
+    alternatives.clear();
+  }
+
   if (intent == 'create_reminder') {
     date ??= dayOffset(0);
     if (time == null) {
@@ -113,9 +130,18 @@ Map<String, dynamic> parseOnDevice(String raw, DateTime now) {
     'intent': intent,
     // Modest on purpose: this is a rules engine, not the AI.
     'confidence': intent == 'unknown' ? 0.2 : 0.6,
-    'title': _title(raw, intent),
-    'amount': intent == 'create_reminder' || intent == 'create_task' || intent == 'query_summary' ? null : amount,
-    'person': _person(raw, text),
+    'title': switch (intent) {
+      'play_media' => _mediaQuery(raw),
+      'open_app' => _appName(raw),
+      'call_contact' => '',
+      _ => _title(raw, intent),
+    },
+    'amount': const {'add_expense', 'add_receivable', 'add_payable', 'settle_ledger'}.contains(intent) ? amount : null,
+    'person': switch (intent) {
+      'call_contact' => _callee(raw, text),
+      'add_expense' || 'create_reminder' || 'create_task' || 'query_summary' || 'play_media' || 'open_app' => null,
+      _ => _person(raw, text),
+    },
     'category': intent == 'add_expense' ? _category(text) : null,
     'date': date,
     'time': time,
@@ -167,6 +193,7 @@ String? _person(String raw, String text) {
     RegExp(r'(?:to|from|with)\s+([a-z]{3,})'),
     RegExp(r'([a-z]{3,})\s+(?:amake|amk)(?:\s|$)'),
     RegExp(r'([a-z]{3,})\s+owes'),
+    RegExp(r'^([a-z]{3,})\s+(?:taka|tk|ferot|shodh|amar)'),
   ];
   for (final re in latin) {
     final m = re.firstMatch(text);
@@ -179,6 +206,7 @@ String? _person(String raw, String text) {
     RegExp(r'([ঀ-৿]{2,})কে(?=\s|$)'),
     RegExp(r'([ঀ-৿]{2,}?)(?:এর|র) কাছে'),
     RegExp(r'([ঀ-৿]{2,}) আমাকে'),
+    RegExp(r'^([ঀ-৿]{2,}) (?:টাকা|ফেরত|শোধ)'),
   ];
   const bnStop = {'আমা', 'তোমা', 'তা', 'ও', 'আমি', 'সবাই', 'আম'};
   for (final re in bn) {
@@ -206,15 +234,110 @@ String _category(String text) {
   return 'other';
 }
 
+/// Makes a short title: drops the "remind me" part, dates, times, money and
+/// filler, so "kal sokal 10 tay rent dite hobe mone koriye dio" becomes
+/// "rent dite hobe" and "aaj lunch e 350 taka khoroch holo" becomes "lunch".
 String _title(String raw, String intent) {
-  var t = raw.trim().replaceAll(RegExp(r'\s+'), ' ');
-  if (intent == 'create_reminder') {
-    // Drop the "remind me" part so the title reads like the thing to do.
-    t = t.replaceAll(RegExp(r'\b(mone koriye dio|mone koriye dao|mone koro|remind me( to)?|reminder)\b', caseSensitive: false), '');
-    t = t.replaceAll(RegExp(r'মনে করিয়ে দিও|মনে করিয়ে দাও|মনে করিয়ে দিবে|মনে কর(ো|িও)?'), '');
+  var t = ' ${raw.trim().replaceAll(RegExp(r'\s+'), ' ')} ';
+  RegExp ci(String p) => RegExp(p, caseSensitive: false);
+  const d = '[0-9০-৯]';
+  final drop = <RegExp>[
+    // "remind me" phrases
+    ci(r'\b(mone koriye dio|mone koriye dao|mone koriye diyo|mone koro|remind me( to)?|reminder|alarm dao)\b'),
+    ci(r'মনে করিয়ে দিও|মনে করিয়ে দাও|মনে করিয়ে দিবে|মনে করিয়ে দিয়ো|মনে কর(ো|িও)?'),
+    // relative times
+    ci('\\b(in )?$d+ ?(minute|minutes|min|mins|ghonta|hour|hours)( pore| por| later)?\\b'),
+    ci('$d+ ?(মিনিট|ঘণ্টা) ?(পরে|পর)?'),
+    ci(r'\b(adha|half an?) (ghonta|hour)( pore)?\b|আধা ঘণ্টা (পরে|পর)?'),
+    // clock times
+    ci('\\b(at )?$d{1,2}([:.]$d{2})? ?(tay|tai|tar|ta(?!ka)|am|pm|baje|o.?clock)\\b( e)?'),
+    ci('$d{1,2}([:.]$d{2})? ?(টায়|টায়|টার|টা(?!কা)|বাজে)'),
+    // day parts and dates
+    ci(r'\b(aaj|aj|ajke|aajke|today|tonight|kal|kalke|tomorrow|porshu|gotokal|yesterday|sokal|shokal|bikal|bikel|dupur|rat|shondha|sondha|bhor|morning|evening|afternoon|night)\b( e)?'),
+    ci(r'(আজকে|আজ|আগামীকাল|গতকাল|পরশু|কাল|সকালে|সকাল|বিকালে|বিকাল|বিকেলে|দুপুরে|দুপুর|রাতে|রাত|সন্ধ্যায়|সন্ধ্যা|ভোরে)(?![ঀ-৿])'),
+  ];
+  if (intent == 'add_expense' || intent == 'add_receivable' || intent == 'add_payable' || intent == 'settle_ledger') {
+    drop.addAll([
+      ci('(৳ ?)?$d+(\\.$d+)? ?(k|hajar|hazar|lakh|হাজার|লাখ)? ?(taka|tk|টাকা|/-)?'),
+      ci(r'\b(khoroch|kharach|holo|hoise|hoyeche|korlam|dilam|disi|kinlam|kinsi|spent|spend|on|for|e)\b'),
+      ci(r'(খরচ|হলো|হয়েছে|করলাম|দিলাম|কিনলাম)(?![ঀ-৿])'),
+    ]);
   }
-  t = t.trim();
+  for (final re in drop) {
+    t = t.replaceAll(re, ' ');
+  }
+  t = t.replaceAll(RegExp(r'\s+'), ' ').trim();
+  // Leftover particles at the edges ("e", "te", "-").
+  t = t.replaceAll(RegExp(r'^(e|te|ke|-|,)\s+|\s+(e|te|-|,)$', caseSensitive: false), '').trim();
+  if (t.isEmpty) t = raw.trim();
   return t.length > 80 ? t.substring(0, 80) : t;
+}
+
+// ---------- assistant actions ----------
+
+const _callPattern =
+    r'(^|[^a-z])(call|kol|phone|fon|ring)\s*(koro|kor|dao|de|din|diye|daw|kore|dite|lagao)([^a-z]|$)|(^|[^a-z])call\s+[a-z0-9+]|(ফোন|কল)\s*(দাও|করো|কর|দিন|দে|লাগাও)';
+const _playPattern =
+    r'(gaan|gan|song|songs|music|গান|মিউজিক).{0,40}(bajao|chalao|shunao|play|charo|শোনাও|বাজাও|চালাও|ছাড়ো|ছাড়)|(^|[^a-z])play\s+\S';
+const _openPattern = r'(^|[^a-z])(open|kholo|khulo|launch)([^a-z]|$)|খোলো|খুলো|খুলুন|চালু করো';
+
+/// Who to call: "rahim ke call koro" -> Rahim, "call mom" -> Mom,
+/// "মাকে ফোন দাও" -> মা, "01712345678 e call koro" -> the number.
+String? _callee(String raw, String text) {
+  final number = RegExp(r'(\+?\d[\d\s-]{5,}\d)').firstMatch(text);
+  if (number != null) return number.group(1)!.replaceAll(RegExp(r'[\s-]'), '');
+  final latin = [
+    RegExp(r'([a-z]+(?:\s[a-z]+)?)\s+(?:ke|k|re)\s+(?:call|kol|phone|fon|ring)'),
+    RegExp(r'(?:call|ring|phone)\s+(?:to\s+)?([a-z]+(?:\s[a-z]+)?)'),
+  ];
+  const notNames = {'koro', 'kor', 'dao', 'de', 'din', 'diye', 'daw', 'kore', 'dite', 'lagao', 'me', 'please', 'now', 'ekhon', 'ekta', 'akta'};
+  for (final re in latin) {
+    final m = re.firstMatch(text);
+    final name = m?.group(1)?.split(' ').where((w) => !notNames.contains(w)).join(' ');
+    if (name != null && name.isNotEmpty) {
+      return name.split(' ').map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
+    }
+  }
+  final bn = RegExp(r'([ঀ-৿]{2,}?)(?:কে|রে)\s*(?:ফোন|কল)').firstMatch(raw);
+  return bn?.group(1);
+}
+
+/// "arijit singh er gaan bajao" -> "arijit singh"; "play shape of you" -> "shape of you".
+String _mediaQuery(String raw) {
+  var t = ' ${raw.trim()} ';
+  for (final p in [
+    r'\b(please|plz|ekta|akta|kichu|ektu)\b',
+    r'\b(gaan|gan|song|songs|music)\b',
+    r'\b(bajao|chalao|shunao|play|charo|koro|kore|dao|ta|er|r)\b',
+    r'(একটা|কিছু|একটু|গান|মিউজিক|বাজাও|চালাও|শোনাও|ছাড়ো|করো|দাও)(?![ঀ-৿])',
+    r'(?<=[ঀ-৿])(এর|র|টা)(?![ঀ-৿])',
+  ]) {
+    t = t.replaceAll(RegExp(p, caseSensitive: false), ' ');
+  }
+  return t.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
+/// "youtube kholo" -> "youtube"; "open whatsapp" -> "whatsapp".
+String _appName(String raw) {
+  var t = ' ${raw.trim()} ';
+  for (final p in [
+    r'\b(open|kholo|khulo|launch|chalu|koro|app|apps|ta|please)\b',
+    r'(খোলো|খুলো|খুলুন|চালু|করো|অ্যাপ|অ্যাপটা)(?![ঀ-৿])',
+  ]) {
+    t = t.replaceAll(RegExp(p, caseSensitive: false), ' ');
+  }
+  return t.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
+/// "10 minute pore" / "in 2 hours" / "১০ মিনিট পরে" / "adha ghonta pore" -> minutes.
+int? _relativeMinutes(String text) {
+  if (RegExp(r'(adha|half an?) (ghonta|hour)|আধা ঘণ্টা').hasMatch(text)) return 30;
+  final m = RegExp(r'(in\s+)?(\d{1,3})\s*(minutes|minute|mins|min|মিনিট|ghonta|hours|hour|hrs|hr|ঘণ্টা)\s*(pore|por|later|পরে|পর)?')
+      .firstMatch(text);
+  if (m == null || (m.group(1) == null && m.group(4) == null)) return null;
+  final n = int.parse(m.group(2)!);
+  final minutes = RegExp(r'ghonta|hour|hr|ঘণ্টা').hasMatch(m.group(3)!) ? n * 60 : n;
+  return minutes > 0 && minutes <= 7 * 24 * 60 ? minutes : null;
 }
 
 bool _looksBanglish(String text) => RegExp(

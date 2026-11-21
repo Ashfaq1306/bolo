@@ -11,6 +11,10 @@ enum CommandIntent {
   addPayable('add_payable'),
   settleLedger('settle_ledger'),
   querySummary('query_summary'),
+  // Assistant actions: they *do* something on the phone instead of saving a record.
+  callContact('call_contact'),
+  playMedia('play_media'),
+  openApp('open_app'),
   unknown('unknown');
 
   const CommandIntent(this.wire);
@@ -21,7 +25,10 @@ enum CommandIntent {
       this == addExpense || this == addReceivable || this == addPayable || this == settleLedger;
 
   /// Intents that produce a record the user can save.
-  bool get isSavable => this != querySummary && this != unknown;
+  bool get isSavable => this != querySummary && this != unknown && !isAction;
+
+  /// Phone actions (call, play, open). Never financial, never saved.
+  bool get isAction => this == callContact || this == playMedia || this == openApp;
 
   static CommandIntent fromWire(String? v) =>
       values.firstWhere((i) => i.wire == v, orElse: () => unknown);
@@ -195,7 +202,7 @@ List<DraftProblem> validateDraft(ParsedCommand d, DateTime now) {
       if (d.person.trim().isEmpty) problems.add(DraftProblem.missingPerson);
     case CommandIntent.settleLedger:
       if (d.person.trim().isEmpty) problems.add(DraftProblem.missingPerson);
-    case CommandIntent.querySummary || CommandIntent.unknown:
+    case CommandIntent.querySummary || CommandIntent.unknown || CommandIntent.callContact || CommandIntent.playMedia || CommandIntent.openApp:
       problems.add(DraftProblem.notSavable);
   }
   return problems;

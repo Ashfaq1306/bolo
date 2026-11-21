@@ -79,4 +79,7 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Offline wake word ("Bolo") recognition. Audio never leaves the phone.
+    implementation("com.alphacephei:vosk-android:0.3.75")
+    implementation("androidx.core:core-ktx:1.13.1")
 }

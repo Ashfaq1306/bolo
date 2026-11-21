@@ -5,7 +5,7 @@
   "greetingAfternoon": "Good afternoon",
   "greetingEvening": "Good evening",
   "greetingNight": "Good night",
-  "tapToSpeak": "Tap the orb and speak",
+  "tapToSpeak": "Tap {name} and speak",
   "orbLabel": "Voice input. Double tap to start or stop listening.",
   "listening": "Listening…",
   "thinking": "Understanding…",
@@ -91,7 +91,7 @@
   "toPay": "To pay",
   "remindersToday": "Today's reminders",
   "dueTasks": "Due & overdue",
-  "nothingToday": "Nothing for today yet. Tap the orb and tell me something.",
+  "nothingToday": "Nothing for today yet. Tap {name} and tell me something.",
   "tasksTitle": "Tasks",
   "remindersTitle": "Reminders",
   "noTasks": "No open tasks",
@@ -225,10 +225,16 @@
   "scanFailed": "Scanning didn't work on this phone. Please enter it by hand.",
   "scanHint": "Read on your phone; the photo is deleted right away. Please check the amount.",
   "devicePowers": "Device features",
-  "devicePowersBody": "Bolo only uses what you tap: contacts open the system picker (Bolo sees just the one you pick), calendar opens your calendar app, receipts are read on the phone and the photo is deleted. No background access.",
+  "devicePowersBody": "Bolo only uses what you ask for: contacts are searched on the phone when you ask it to call someone (names are never uploaded), calls need your confirmation, music and apps open in their own apps, receipts are read on the phone and the photo is deleted. The only background access is the optional \"Bolo\" listener, which runs on the phone and shows a notification while on.",
   "updateTitle": "Update available",
   "updateBody": "Bolo {version} is ready. Your data stays safe in your account.",
-  "@updateBody": {"placeholders": {"version": {"type": "String"}}},
+  "@updateBody": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "updateMandatoryBody": "This update is required to keep using Bolo.",
   "updateNow": "Update",
   "updateLater": "Later",
@@ -237,6 +243,128 @@
   "checkUpdates": "Check for updates",
   "upToDate": "You have the latest version.",
   "appVersion": "Version {version}",
-  "@appVersion": {"placeholders": {"version": {"type": "String"}}},
-  "offlineParserNote": "Understood on your phone (AI not connected). Please check the details."
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineParserNote": "Understood on your phone (AI not connected). Please check the details.",
+  "@tapToSpeak": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@nothingToday": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nothingPlannedToday": "No reminders or tasks today.",
+  "exactAlarmTitle": "Ring reminders on time?",
+  "exactAlarmBody": "Android may delay reminders by a few minutes. On the next screen, turn on \"Allow setting alarms and reminders\" for Bolo so they ring exactly on time.",
+  "exactAlarmOpen": "Turn on",
+  "intentCall": "Call",
+  "intentPlay": "Play music",
+  "intentOpen": "Open app",
+  "speakCall": "Calling {name}.",
+  "@speakCall": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speakPlay": "Playing {query}.",
+  "@speakPlay": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "speakOpen": "Opening {app}.",
+  "@speakOpen": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "wakeGreeting": "Yes? What can I do for you?",
+  "needUnlock": "Please unlock your phone first.",
+  "appNotFound": "I couldn't find an app called \"{app}\".",
+  "@appNotFound": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "playFailed": "I couldn't find a music app or YouTube on this phone.",
+  "callWho": "Who should I call?",
+  "callButton": "Call",
+  "callNoMatch": "I couldn't find \"{name}\" in your contacts.",
+  "@callNoMatch": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callTypeNumber": "Or type a number",
+  "contactsPermissionNeeded": "To find people by name, allow Bolo to read your contacts. Or pick one below.",
+  "callConfirmQuestion": "Shall I call {name}?",
+  "@callConfirmQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callDialerNote": "Calling isn't allowed, so the dialer opened with the number.",
+  "lockedHint": "Your phone is locked: Bolo is only listening. Your data stays hidden until you unlock.",
+  "assistantTitle": "Assistant",
+  "assistantName": "Assistant's name",
+  "assistantNameHint": "Call it by this name. English letters, e.g. Bolo, Robi, Mina.",
+  "assistantNameInvalid": "Use 2–20 English letters.",
+  "assistantNameUnknown": "The offline listener doesn't know this word, so it couldn't hear it. Try another name (e.g. Bolo, Robi, Mina, Jarvis).",
+  "handsFree": "Answer when I say \"{name}\"",
+  "@handsFree": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "handsFreeBody": "Say \"{name}\" even when the screen is off or locked. Listening happens on this phone; nothing is recorded or sent.",
+  "@handsFreeBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sensitivity": "How easily it hears its name",
+  "sensLow": "Less",
+  "sensNormal": "Normal",
+  "sensHigh": "More",
+  "allowLockScreen": "Appear on the lock screen",
+  "allowOverApps": "Appear over other apps",
+  "allowButton": "Allow",
+  "allowedLabel": "On",
+  "handsFreeLimits": "Works while the phone is on (screen off or locked is fine), not when it is switched off. Uses a little more battery and shows a permanent notification. After restarting the phone, open Bolo once.",
+  "assistantCanDo": "Try: \"{name}, call Ammu\", \"play Arijit Singh\", \"open YouTube\", \"remind me in 10 minutes to drink water\".",
+  "@assistantCanDo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

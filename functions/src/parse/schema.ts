@@ -15,6 +15,9 @@ export const INTENTS = [
   "add_payable",
   "settle_ledger",
   "query_summary",
+  "call_contact",
+  "play_media",
+  "open_app",
   "unknown",
 ] as const;
 

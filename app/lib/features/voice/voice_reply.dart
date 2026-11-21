@@ -20,6 +20,9 @@ class DeviceVoiceReplyService implements VoiceReplyService {
     _tts.setCompletionHandler(() => _speaking.value = false);
     _tts.setCancelHandler(() => _speaking.value = false);
     _tts.setErrorHandler((_) => _speaking.value = false);
+    // speak() completes when Bolo has finished talking, so the assistant can
+    // say "Yes?" and only then start listening (it must not hear itself).
+    _tts.awaitSpeakCompletion(true);
   }
 
   final _tts = FlutterTts();
@@ -61,7 +64,7 @@ class DeviceVoiceReplyService implements VoiceReplyService {
       await _tts.stop();
       await _tts.setLanguage(locale);
       await _tts.setSpeechRate(0.5);
-      await _tts.setPitch(1.08);
+      await _tts.setPitch(1.18); // a little higher: a cute robot voice
       await _tts.speak(text);
     } catch (e) {
       debugPrint('TTS failed: $e');
