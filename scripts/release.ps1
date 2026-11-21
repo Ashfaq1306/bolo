@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Publishes a new Bolo APK and tells every installed copy to update.
 
@@ -117,7 +117,8 @@ $rc.parameters.update_notes_en.defaultValue.value = $NotesEn
 $rc.parameters.update_notes_bn.defaultValue.value = $NotesBn
 if ($Mandatory) { $rc.parameters.min_build_code.defaultValue.value = "$build" }
 [IO.File]::WriteAllText($template, ($rc | ConvertTo-Json -Depth 10))
-Invoke-Step "Remote Config" { firebase deploy --only remoteconfig --project bolo-bd --cwd $root }
+Push-Location $root
+try { Invoke-Step "Remote Config" { firebase deploy --only remoteconfig --project bolo-bd } } finally { Pop-Location }
 Invoke-Step "Commit Remote Config" { git -C $root commit -m "Remote Config: latest build $build" -- $template }
 Invoke-Step "Push" { git -C $root push origin HEAD }
 

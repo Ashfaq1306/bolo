@@ -1,34 +1,46 @@
 {
-  "parameters": {
-    "latest_build_code": {
-      "defaultValue": { "value": "1" },
-      "valueType": "NUMBER",
-      "description": "Build number (the +N in pubspec version) of the newest APK on GitHub Releases. Apps with a lower build number show 'Update available'. Set by scripts/release.ps1."
-    },
-    "latest_version_name": {
-      "defaultValue": { "value": "1.0.0" },
-      "valueType": "STRING",
-      "description": "Human-readable version shown in the update dialog."
-    },
-    "min_build_code": {
-      "defaultValue": { "value": "0" },
-      "valueType": "NUMBER",
-      "description": "Builds below this MUST update (dialog can't be dismissed). Raise only for security fixes or breaking backend changes."
-    },
-    "apk_url": {
-      "defaultValue": { "value": "https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo.apk" },
-      "valueType": "STRING",
-      "description": "Where the newest APK is downloaded from. Must be https."
-    },
-    "update_notes_bn": {
-      "defaultValue": { "value": "" },
-      "valueType": "STRING",
-      "description": "What's new (Bangla)."
-    },
-    "update_notes_en": {
-      "defaultValue": { "value": "" },
-      "valueType": "STRING",
-      "description": "What's new (English)."
-    }
-  }
+    "parameters":  {
+                       "latest_build_code":  {
+                                                 "defaultValue":  {
+                                                                      "value":  "1"
+                                                                  },
+                                                 "valueType":  "NUMBER",
+                                                 "description":  "Build number (the +N in pubspec version) of the newest APK on GitHub Releases. Apps with a lower build number show \u0027Update available\u0027. Set by scripts/release.ps1."
+                                             },
+                       "latest_version_name":  {
+                                                   "defaultValue":  {
+                                                                        "value":  "1.0.0"
+                                                                    },
+                                                   "valueType":  "STRING",
+                                                   "description":  "Human-readable version shown in the update dialog."
+                                               },
+                       "min_build_code":  {
+                                              "defaultValue":  {
+                                                                   "value":  "0"
+                                                               },
+                                              "valueType":  "NUMBER",
+                                              "description":  "Builds below this MUST update (dialog can\u0027t be dismissed). Raise only for security fixes or breaking backend changes."
+                                          },
+                       "apk_url":  {
+                                       "defaultValue":  {
+                                                            "value":  "https://github.com/Ashfaq1306/bolo/releases/latest/download/bolo.apk"
+                                                        },
+                                       "valueType":  "STRING",
+                                       "description":  "Where the newest APK is downloaded from. Must be https."
+                                   },
+                       "update_notes_bn":  {
+                                               "defaultValue":  {
+                                                                    "value":  "প্রথম পাবলিক ভার্সন: ভয়েস/লিখে কমান্ড, রিমাইন্ডার, কাজ, খরচ, কে কত পাবে/দেবে, রসিদ স্ক্যান, বলোর মুখ, এবং স্বয়ংক্রিয় আপডেট নোটিফিকেশন।"
+                                                                },
+                                               "valueType":  "STRING",
+                                               "description":  "What\u0027s new (Bangla)."
+                                           },
+                       "update_notes_en":  {
+                                               "defaultValue":  {
+                                                                    "value":  "First public build: voice/typed commands, reminders, tasks, expenses, who-owes-whom, receipt scan, Bolo\u0027s face, and automatic update alerts."
+                                                                },
+                                               "valueType":  "STRING",
+                                               "description":  "What\u0027s new (English)."
+                                           }
+                   }
 }
