@@ -64,7 +64,7 @@ Proposed by [docs/13](13-phase0-guest-data-audit.md); each phase needs explicit 
 | Phase | Scope | Exit criteria | Size |
 |---|---|---|---|
 | 0 | Audit and migration design | ✅ done (docs/13, ADR-10..12); decisions in docs/11 § 11.4 pending | – |
-| 1 Data foundation | Drift DB; device identity; offline first launch; `DriftRecordsRepository`; Firestore-free models; inbox into Drift; save `legacy_anon_uid`; journaled migration (scenarios A–C); guests stop writing to Firestore | Airplane-mode first launch works; migration tests pass; all existing tests pass | L (≈ 3–4 weeks part-time) |
+| 1 Data foundation (**in progress**, branch `phase1-data-foundation`) | Drift DB; device identity; offline first launch; `DriftRecordsRepository`; Firestore-free models; inbox into Drift; save `legacy_anon_uid`; journaled migration (scenarios A–C); guests stop writing to Firestore | Airplane-mode first launch works; migration tests pass; all existing tests pass. Code + unit tests done 2026-11-27; device tests (airplane mode, upgrade from 1.1 on both phones) pending | L (≈ 3–4 weeks part-time) |
 | 2 Registered sync | Outbox push/pull, tombstones, conflict UI; sign in to an existing account with the keep/import/separate choice; Google sign-in | Two-device tests pass; no duplicates after interrupted retries | L |
 | 3 Security & reliability | Rules: anonymous read-only, then none; minimum app version; App Check; delete/export; sync monitoring; toolchain upgrade | Rules tests for every case; staged rollout | M |
 | 4 Assistant foundation | Unified voice + chat, tool registry, context, user-controlled memory; AI function deploy (M6, needs Blaze approval) | Separate approval | L |

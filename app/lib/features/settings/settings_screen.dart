@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -10,6 +9,7 @@ import '../../l10n/app_localizations.dart';
 import '../assistant/assistant_settings_card.dart';
 import '../command/capture_controller.dart';
 import '../command/confirmation_sheet.dart';
+import '../migration/guest_migration.dart';
 import '../records/models.dart';
 import '../update/update_prompt.dart';
 import '../voice/voice_check_card.dart';
@@ -22,9 +22,11 @@ class SettingsScreen extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final theme = Theme.of(context);
-    final user = ref.watch(authStateProvider).value;
+    final registeredUid = ref.watch(registeredUidProvider);
+    final user = ref.watch(currentUserProvider);
+    final migration = ref.watch(migrationStatusProvider);
     final summaryHour = ref.watch(summaryHourProvider);
-    final inbox = ref.watch(inboxItemsProvider);
+    final inbox = ref.watch(inboxItemsProvider).value ?? const [];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -95,16 +97,13 @@ class SettingsScreen extends ConsumerWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l.account, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
-            if (user == null || user.isAnonymous) ...[
-              Text(l.anonymousWarning),
-              const SizedBox(height: 8),
-              FilledButton.tonalIcon(
-                onPressed: () => _linkEmail(context, ref),
-                icon: const Icon(Icons.lock_rounded),
-                label: Text(l.secureAccount),
-              ),
-            ] else
-              Text(l.accountSecured(user.email ?? '')),
+            if (registeredUid == null)
+              // Account sign-up returns with registered sync (Phase 2). Linking
+              // now would hide the guest data, which lives only on this phone.
+              Text(l.guestLocalOnly)
+            else
+              Text(l.accountSecured(user?.email ?? '')),
+            if (migration != null) _MigrationLine(migration),
           ]),
         ),
         const SizedBox(height: 12),
@@ -150,7 +149,6 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: FilledButton.tonal(
                   onPressed: () async {
                     await ref.read(inboxStoreProvider).remove(item);
-                    ref.invalidate(inboxItemsProvider);
                     await ref.read(captureControllerProvider.notifier).submit(
                           item.text,
                           source: item.fromVoice ? RecordSource.voice : RecordSource.text,
@@ -197,54 +195,35 @@ class SettingsScreen extends ConsumerWidget {
       ]),
     );
   }
-
-  Future<void> _linkEmail(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final creds = await showDialog<(String, String)>(context: context, builder: (_) => const _LinkEmailDialog());
-    if (creds == null) return;
-    try {
-      await ref.read(authServiceProvider).linkEmail(creds.$1, creds.$2);
-      ref.invalidate(authStateProvider);
-      messenger.showSnackBar(SnackBar(content: Text(l.saved)));
-    } on FirebaseAuthException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.message ?? e.code)));
-    }
-  }
 }
 
-/// Owns its controllers so they are disposed after the dialog is gone.
-class _LinkEmailDialog extends StatefulWidget {
-  const _LinkEmailDialog();
-  @override
-  State<_LinkEmailDialog> createState() => _LinkEmailDialogState();
-}
-
-class _LinkEmailDialogState extends State<_LinkEmailDialog> {
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-
-  @override
-  void dispose() {
-    _email.dispose();
-    _password.dispose();
-    super.dispose();
-  }
+/// Progress of the one-time move of earlier data onto this phone.
+class _MigrationLine extends StatelessWidget {
+  const _MigrationLine(this.status);
+  final MigrationStatus status;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l.secureAccount),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: InputDecoration(labelText: l.email)),
-        const SizedBox(height: 8),
-        TextField(controller: _password, obscureText: true, decoration: InputDecoration(labelText: l.password)),
+    final lang = Localizations.localeOf(context).languageCode;
+    final text = switch (status.phase) {
+      MigrationPhase.notNeeded => null,
+      MigrationPhase.running => l.migrationRunning,
+      MigrationPhase.cacheOnly => l.migrationCacheOnly,
+      MigrationPhase.done => status.copied == 0 ? null : l.migrationDone(localDigits('${status.copied}', lang)),
+      MigrationPhase.failed => l.migrationFailed,
+    };
+    if (text == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(children: [
+        Icon(
+          status.phase == MigrationPhase.failed ? Icons.error_outline_rounded : Icons.phone_android_rounded,
+          size: 18,
+        ),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text)),
       ]),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.cancel)),
-        FilledButton(onPressed: () => Navigator.pop(context, (_email.text, _password.text)), child: Text(l.save)),
-      ],
     );
   }
 }

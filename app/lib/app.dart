@@ -12,6 +12,7 @@ import 'core/theme.dart';
 import 'features/assistant/assistant_settings.dart';
 import 'features/command/capture_controller.dart';
 import 'features/home/home_screen.dart';
+import 'features/migration/guest_migration.dart';
 import 'features/money/money_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/tasks/tasks_screen.dart';
@@ -38,56 +39,43 @@ class BoloApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const AuthGate(),
+      home: const HomeShell(),
     );
   }
 }
 
-/// Signs in anonymously on first launch; shows a retry screen if offline.
-class AuthGate extends ConsumerStatefulWidget {
-  const AuthGate({super.key});
-  @override
-  ConsumerState<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends ConsumerState<AuthGate> {
-  bool _failed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _signIn();
-  }
-
-  Future<void> _signIn() async {
-    setState(() => _failed = false);
-    try {
-      await ref.read(authServiceProvider).ensureSignedIn();
-    } catch (e) {
-      debugPrint('Sign-in failed: $e');
-      if (mounted) setState(() => _failed = true);
-    }
-  }
+/// Shown only if the local database can't be opened. The file is kept as it
+/// is (never wiped automatically), docs/13 § 9.
+class DatabaseErrorApp extends StatelessWidget {
+  const DatabaseErrorApp({super.key, required this.locale});
+  final Locale locale;
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final user = ref.watch(authStateProvider).value;
-    if (user != null) return const HomeShell();
-    return Scaffold(
-      body: Center(
-        child: _failed
-            ? Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.wifi_off_rounded, size: 48),
-                  const SizedBox(height: 12),
-                  Text(l.signInFailed, textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
-                  FilledButton(onPressed: _signIn, child: Text(l.retry)),
-                ]),
-              )
-            : const CircularProgressIndicator(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: BoloTheme.dark(),
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.error_outline_rounded, size: 48),
+                const SizedBox(height: 12),
+                Text(AppLocalizations.of(context).dbOpenFailed, textAlign: TextAlign.center),
+              ]),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -111,10 +99,39 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startSession();
       _resyncNotifications();
       _checkForUpdate();
       _setUpWakeWord();
     });
+  }
+
+  // ---------------- data and session ----------------
+
+  /// Nothing here blocks the app: records are local and work offline.
+  Future<void> _startSession() async {
+    // 1. Copy old Firestore guest data (if any) onto the phone.
+    await _runMigration();
+    // 2. An anonymous session is used only for the AI quota (ADR-11); no
+    //    record depends on it, so failing offline is fine.
+    try {
+      await ref.read(authServiceProvider).ensureSignedIn();
+    } catch (e) {
+      debugPrint('Anonymous session unavailable: ${e.runtimeType}');
+    }
+  }
+
+  Future<void> _runMigration() async {
+    final result = await ref.read(migrationStatusProvider.notifier).run();
+    if (!mounted || !result.justCompleted) return;
+    // Alarms for the copied reminders and tasks.
+    await _resyncNotifications();
+    if (!mounted || result.copied == 0) return;
+    final l = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l.migrationDone(localDigits('${result.copied}', lang)))),
+    );
   }
 
   // ---------------- hands-free: "Bolo!" ----------------
@@ -189,6 +206,14 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Refresh the summary text when the app goes to the background.
     if (state == AppLifecycleState.paused) _refreshSummaryNotification();
+    // Back in the app: finish an interrupted migration or session (maybe
+    // the phone is online now).
+    if (state == AppLifecycleState.resumed) {
+      final phase = ref.read(migrationStatusProvider)?.phase;
+      if (phase == MigrationPhase.cacheOnly || phase == MigrationPhase.failed || ref.read(currentUserProvider) == null) {
+        _startSession();
+      }
+    }
   }
 
   /// Re-creates alarms from the database (reinstall / new phone / lost alarms).

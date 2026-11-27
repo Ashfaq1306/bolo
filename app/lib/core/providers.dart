@@ -5,10 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/bolo_database.dart';
+import '../data/device_identity.dart';
 import '../features/auth/auth_service.dart';
 import '../features/command/command_saver.dart';
 import '../features/command/command_service.dart';
 import '../features/inbox/inbox_store.dart';
+import '../features/migration/guest_migration.dart';
+import '../features/migration/legacy_source.dart';
+import '../features/records/drift_records_repository.dart';
 import '../features/records/models.dart';
 import '../features/records/records_repository.dart';
 import '../features/reminders/reminder_scheduler.dart';
@@ -29,17 +34,91 @@ final sharedPreferencesProvider = Provider<SharedPreferences>(
   (ref) => throw UnimplementedError('Overridden in main()'),
 );
 
+/// The local database (ADR-10). Opened in main().
+final databaseProvider = Provider<BoloDatabase>(
+  (ref) => throw UnimplementedError('Overridden in main()'),
+);
+
+/// This phone's device identity: owns the guest workspace (ADR-11).
+final deviceIdentityProvider = Provider<DeviceIdentity>(
+  (ref) => throw UnimplementedError('Overridden in main()'),
+);
+
 final authServiceProvider = Provider<AuthService>((ref) => AuthService(FirebaseAuth.instance));
 
 final authStateProvider = StreamProvider<User?>((ref) => ref.watch(authServiceProvider).userChanges);
 
-final uidProvider = Provider<String?>((ref) => ref.watch(authStateProvider).value?.uid);
+/// The Firebase user restored at startup, used until [authStateProvider]
+/// delivers its first value (so a registered user never flashes guest data).
+final initialUserProvider = Provider<User?>((ref) => null);
 
-final recordsRepositoryProvider = Provider<RecordsRepository?>((ref) {
-  final uid = ref.watch(uidProvider);
-  if (uid == null) return null;
-  return FirestoreRecordsRepository(FirebaseFirestore.instance, uid);
+final currentUserProvider = Provider<User?>((ref) {
+  final auth = ref.watch(authStateProvider);
+  return auth.hasValue ? auth.value : ref.watch(initialUserProvider);
 });
+
+/// The uid of a registered (non-anonymous) account, or null for a guest.
+/// An anonymous Firebase session never owns records (ADR-11).
+final registeredUidProvider = Provider<String?>((ref) {
+  final user = ref.watch(currentUserProvider);
+  return user == null || user.isAnonymous ? null : user.uid;
+});
+
+final recordsRepositoryProvider = Provider<RecordsRepository>((ref) {
+  final registeredUid = ref.watch(registeredUidProvider);
+  // Accounts registered before Phase 2 keep their Firestore data until
+  // registered sync ships. Guests are local-only.
+  if (registeredUid != null) return FirestoreRecordsRepository(FirebaseFirestore.instance, registeredUid);
+  final identity = ref.watch(deviceIdentityProvider);
+  return DriftRecordsRepository(
+    ref.watch(databaseProvider),
+    ownerScope: identity.guestScope,
+    deviceId: identity.deviceId,
+    clock: ref.watch(clockProvider),
+  );
+});
+
+/// One-time copy of the old Firestore guest data into the local database.
+final guestMigrationProvider = Provider<GuestMigration>((ref) => GuestMigration(
+      db: ref.watch(databaseProvider),
+      identity: ref.watch(deviceIdentityProvider),
+      clock: ref.watch(clockProvider),
+      sourceFor: (legacyUid) => FirestoreLegacySource(
+        FirebaseFirestore.instance,
+        legacyUid: legacyUid,
+        currentUid: () => FirebaseAuth.instance.currentUser?.uid,
+      ),
+    ));
+
+class MigrationStatusNotifier extends Notifier<MigrationStatus?> {
+  Future<MigrationStatus>? _running;
+
+  @override
+  MigrationStatus? build() => null;
+
+  /// Runs or resumes the migration; concurrent calls share one run.
+  Future<MigrationStatus> run() => _running ??= () async {
+        try {
+          final migration = ref.read(guestMigrationProvider);
+          final before = await migration.status();
+          if (before.phase == MigrationPhase.notNeeded || before.phase == MigrationPhase.done) {
+            state = before;
+            return before;
+          }
+          state = MigrationStatus(MigrationPhase.running, copied: before.copied);
+          final result = await migration.run();
+          state = result;
+          return result.phase == MigrationPhase.done
+              ? MigrationStatus(result.phase, copied: result.copied, justCompleted: true)
+              : result;
+        } finally {
+          _running = null;
+        }
+      }();
+}
+
+final migrationStatusProvider =
+    NotifierProvider<MigrationStatusNotifier, MigrationStatus?>(MigrationStatusNotifier.new);
 
 final reminderSchedulerProvider = Provider<ReminderScheduler>(
   (ref) => throw UnimplementedError('Overridden in main()'),
@@ -64,17 +143,20 @@ final commandServiceProvider = Provider<CommandService>(
 /// Checks Firebase Remote Config for a newer APK (see app_updater.dart).
 final appUpdaterProvider = Provider<AppUpdater>((ref) => RemoteConfigAppUpdater());
 
-final commandSaverProvider = Provider<CommandSaver?>((ref) {
-  final repo = ref.watch(recordsRepositoryProvider);
-  if (repo == null) return null;
+final commandSaverProvider = Provider<CommandSaver>((ref) {
   return CommandSaver(
-    repo: repo,
+    repo: ref.watch(recordsRepositoryProvider),
     scheduler: ref.watch(reminderSchedulerProvider),
     now: ref.watch(clockProvider),
   );
 });
 
-final inboxStoreProvider = Provider<InboxStore>((ref) => InboxStore(ref.watch(sharedPreferencesProvider)));
+/// Inbox captures are always local to this phone, for guests and accounts.
+final inboxStoreProvider = Provider<InboxStore>(
+  (ref) => InboxStore(ref.watch(databaseProvider), ownerScope: ref.watch(deviceIdentityProvider).guestScope),
+);
+
+final inboxItemsProvider = StreamProvider<List<InboxItem>>((ref) => ref.watch(inboxStoreProvider).watch());
 
 /// Bolo's voice (phone text-to-speech).
 final voiceReplyProvider = Provider<VoiceReplyService>((ref) => DeviceVoiceReplyService());
@@ -84,24 +166,20 @@ final receiptScannerProvider = Provider<ReceiptScanner>((ref) => ReceiptScanner(
 // ---- Live data streams --------------------------------------------------
 
 final remindersProvider = StreamProvider<List<Reminder>>((ref) {
-  final repo = ref.watch(recordsRepositoryProvider);
-  return repo == null ? const Stream.empty() : repo.watchPendingReminders();
+  return ref.watch(recordsRepositoryProvider).watchPendingReminders();
 });
 
 final tasksProvider = StreamProvider<List<TaskItem>>((ref) {
-  final repo = ref.watch(recordsRepositoryProvider);
-  return repo == null ? const Stream.empty() : repo.watchOpenTasks();
+  return ref.watch(recordsRepositoryProvider).watchOpenTasks();
 });
 
 final monthExpensesProvider = StreamProvider<List<Expense>>((ref) {
-  final repo = ref.watch(recordsRepositoryProvider);
   final now = ref.watch(clockProvider)();
-  return repo == null ? const Stream.empty() : repo.watchExpensesSince(DhakaTime.startOfMonth(now));
+  return ref.watch(recordsRepositoryProvider).watchExpensesSince(DhakaTime.startOfMonth(now));
 });
 
 final openLedgerProvider = StreamProvider<List<LedgerEntry>>((ref) {
-  final repo = ref.watch(recordsRepositoryProvider);
-  return repo == null ? const Stream.empty() : repo.watchOpenLedger();
+  return ref.watch(recordsRepositoryProvider).watchOpenLedger();
 });
 
 final dailySummaryProvider = Provider<DailySummary>((ref) => DailySummary.compute(
@@ -115,7 +193,8 @@ final dailySummaryProvider = Provider<DailySummary>((ref) => DailySummary.comput
 // ---- Settings -----------------------------------------------------------
 
 class LocaleNotifier extends Notifier<Locale> {
-  static const _key = 'settings.locale';
+  static const prefsKey = 'settings.locale';
+  static const _key = prefsKey;
   @override
   Locale build() => Locale(ref.watch(sharedPreferencesProvider).getString(_key) ?? 'bn');
 

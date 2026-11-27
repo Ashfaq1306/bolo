@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
 import '../assistant/assistant_settings.dart';
-import '../inbox/inbox_store.dart';
 import '../records/models.dart';
 import '../voice/speech_service.dart';
 import 'command_service.dart';
@@ -156,9 +155,10 @@ class CaptureController extends Notifier<CaptureState> {
       };
       if (e.failure == ParseFailure.offline) {
         await ref.read(inboxStoreProvider).add(
-              InboxItem(text: clean, createdAt: ref.read(clockProvider)(), fromVoice: source == RecordSource.voice),
+              text: clean,
+              createdAt: ref.read(clockProvider)(),
+              fromVoice: source == RecordSource.voice,
             );
-        ref.invalidate(inboxItemsProvider);
       } else if (e.failure == ParseFailure.server || e.failure == ParseFailure.quotaExceeded) {
         // Still let the user add it by hand: open an empty card with the text.
         state = CaptureState(
@@ -178,4 +178,3 @@ class CaptureController extends Notifier<CaptureState> {
 
 final captureControllerProvider = NotifierProvider<CaptureController, CaptureState>(CaptureController.new);
 
-final inboxItemsProvider = Provider<List<InboxItem>>((ref) => ref.watch(inboxStoreProvider).load());

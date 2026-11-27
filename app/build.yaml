@@ -1,0 +1,7 @@
+# Code generation is used only for the Drift database (lib/data/).
+targets:
+  $default:
+    builders:
+      drift_dev:
+        generate_for:
+          - lib/data/**.dart

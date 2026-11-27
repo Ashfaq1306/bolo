@@ -684,4 +684,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceCheckCopied => 'Report copied';
+
+  @override
+  String get guestLocalOnly =>
+      'Your data is saved only on this phone. If you uninstall the app or clear its data, it can\'t be recovered. Backup and sync with an account are coming in a later update.';
+
+  @override
+  String get migrationRunning => 'Moving your data onto this phone…';
+
+  @override
+  String migrationDone(String count) {
+    return 'Your data is on this phone: $count items moved.';
+  }
+
+  @override
+  String get migrationCacheOnly =>
+      'Some items will finish moving when you\'re online.';
+
+  @override
+  String get migrationFailed =>
+      'Couldn\'t finish moving your earlier data. Bolo will try again; nothing was deleted.';
+
+  @override
+  String get dbOpenFailed =>
+      'Bolo couldn\'t open its data on this phone. Nothing was deleted. Please close the app and open it again.';
 }

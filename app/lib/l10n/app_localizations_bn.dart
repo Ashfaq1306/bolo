@@ -680,4 +680,27 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get voiceCheckCopied => 'রিপোর্ট কপি হয়েছে';
+
+  @override
+  String get guestLocalOnly =>
+      'আপনার তথ্য শুধু এই ফোনে সংরক্ষিত আছে। অ্যাপ মুছে ফেললে বা অ্যাপের ডেটা ক্লিয়ার করলে তা আর ফেরত পাওয়া যাবে না। অ্যাকাউন্টে ব্যাকআপ ও সিঙ্ক পরের আপডেটে আসছে।';
+
+  @override
+  String get migrationRunning => 'আপনার তথ্য এই ফোনে আনা হচ্ছে…';
+
+  @override
+  String migrationDone(String count) {
+    return 'আপনার তথ্য এখন এই ফোনে: $countটি আইটেম আনা হয়েছে।';
+  }
+
+  @override
+  String get migrationCacheOnly => 'ইন্টারনেট পেলে বাকি আইটেমগুলো আনা হবে।';
+
+  @override
+  String get migrationFailed =>
+      'আগের তথ্য আনা শেষ করা যায়নি। বলো আবার চেষ্টা করবে; কিছুই মুছে ফেলা হয়নি।';
+
+  @override
+  String get dbOpenFailed =>
+      'বলো এই ফোনে তার তথ্য খুলতে পারেনি। কিছুই মুছে ফেলা হয়নি। অ্যাপটি বন্ধ করে আবার খুলুন।';
 }

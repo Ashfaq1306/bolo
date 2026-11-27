@@ -103,13 +103,14 @@ When lists grow (e.g. a "done" history), add `orderBy` + `limit` and the composi
 
 ## 5.4 On-device storage (not Firestore)
 
-> **Target changed (2026-11-27):** per [ADR-10](adr/0010-drift-local-first.md) and [ADR-11](adr/0011-guest-data-local-only.md), personal records (and the inbox) move to a local Drift/SQLite database; guests never write to Firestore. The table below describes the current code. Target schema: [docs/13 § 9](13-phase0-guest-data-audit.md#9-drift-target).
+> **Since Phase 1 (2026-11-27, [ADR-10](adr/0010-drift-local-first.md), [ADR-11](adr/0011-guest-data-local-only.md)):** personal records and the inbox live in a local Drift/SQLite database (`bolo.sqlite`, § 5.7). Guests never write to Firestore. Accounts registered before Phase 2 still read and write Firestore until registered sync ships.
 
 | Data | Store | Why |
 |---|---|---|
-| Firestore cache | Firestore SDK (SQLite internally) | offline reads/writes |
-| Inbox (unprocessed offline captures) | `shared_preferences` (JSON list, max 20 items) | must not be uploaded without the user's action |
-| UI settings (language chip, onboarding seen) | `shared_preferences` | |
+| Reminders, tasks, expenses, ledger, inbox | Drift (`app/lib/data/bolo_database.dart`) | source of truth on the phone, works offline from first launch |
+| Firestore cache | Firestore SDK | read by the one-time guest migration; used by pre-Phase-2 registered accounts |
+| UI settings (language, voice, summary time) | `shared_preferences` | not personal records |
+| Old inbox (`inbox.v1`) | `shared_preferences` | copied once into Drift; left in place, no longer used |
 
 ## 5.5 Estimated size
 
@@ -120,3 +121,31 @@ A record is about 300–500 bytes. A heavy user with 20 records/day for a year p
 > The one-time move of existing Firestore records into Drift is designed in [docs/13 § 11](13-phase0-guest-data-audit.md#11-guest-migration-six-scenarios) (journaled, idempotent, never deletes the source).
 
 `schemaVersion` on every document means the app can read v1 and v2 side by side during a migration. Changes should only add fields; renaming or deleting fields requires a one-off migration function.
+
+## 5.7 Local database (Drift), schema version 1
+
+File: `app/lib/data/bolo_database.dart`. Code generation: `dart run build_runner build` (the generated `bolo_database.g.dart` is committed). Times are UTC milliseconds in integer columns; money is integer minor units plus `currency`.
+
+**Columns on every record table** (`reminders`, `tasks`, `expenses`, `ledger_entries`):
+
+| Column | Meaning |
+|---|---|
+| `id` (PK) | stable text id; migrated records keep their Firestore document id |
+| `owner_scope` | `device:<deviceId>` (guest) or `account:<uid>` (registered, Phase 2) |
+| `created_at`, `updated_at` | UTC ms |
+| `deleted_at` | tombstone; deletes never remove the row |
+| `rev` | +1 on every local change |
+| `last_device_id` | device that made the last change |
+| `sync_state` | `local` (guest, never syncs), `pending`, `synced`, `conflict` |
+| `server_updated_at` | Firestore `updatedAt` of the copy last reconciled with |
+| `origin` | `local`, `migrated`, `imported` |
+| `schema_version` | record schema version |
+
+**Per table:** `reminders` (title, remind_at, repeat, status, source, time_zone), `tasks` (title, due_at, remind_at, priority, status, completed_at, source, time_zone), `expenses` (amount_minor, currency, category, note, spent_at, source), `ledger_entries` (direction, person, amount_minor, currency, due_at, status, settled_at, note, source).
+
+**Other tables:** `inbox_items` (local only, max 20 per owner), `app_meta` (key/value: `device_id`, `legacy_anon_uid`, `legacy_checked`, `inbox_imported`), `migration_runs` and `migration_items` (the guest-migration journal: states, counts, ids and checksums only, never record content).
+
+**Indexes:** `(owner_scope, deleted_at, status)` on reminders, tasks and ledger; `(owner_scope, remind_at)`; `(owner_scope, spent_at)`; `(sync_state)` on every record table.
+
+**Not yet (Phase 2):** `sync_outbox`, `sync_state` cursors, `ledger_payments`. Each schema change raises `schemaVersion`, adds a step in `MigrationStrategy.onUpgrade` and a test.
+

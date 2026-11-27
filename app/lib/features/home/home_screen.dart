@@ -354,7 +354,7 @@ class TodaySummaryView extends ConsumerWidget {
                   value: false,
                   title: Text(t.title),
                   subtitle: Text(DhakaTime.formatDate(t.dueAt!, lang)),
-                  onChanged: (_) => ref.read(recordsRepositoryProvider)?.setTaskDone(t.id, true),
+                  onChanged: (_) => ref.read(recordsRepositoryProvider).setTaskDone(t.id, true),
                 ),
             ]),
           ),

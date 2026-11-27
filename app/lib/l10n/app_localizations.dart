@@ -1291,6 +1291,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Report copied'**
   String get voiceCheckCopied;
+
+  /// No description provided for @guestLocalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is saved only on this phone. If you uninstall the app or clear its data, it can\'t be recovered. Backup and sync with an account are coming in a later update.'**
+  String get guestLocalOnly;
+
+  /// No description provided for @migrationRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving your data onto this phone…'**
+  String get migrationRunning;
+
+  /// No description provided for @migrationDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is on this phone: {count} items moved.'**
+  String migrationDone(String count);
+
+  /// No description provided for @migrationCacheOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items will finish moving when you\'re online.'**
+  String get migrationCacheOnly;
+
+  /// No description provided for @migrationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t finish moving your earlier data. Bolo will try again; nothing was deleted.'**
+  String get migrationFailed;
+
+  /// No description provided for @dbOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bolo couldn\'t open its data on this phone. Nothing was deleted. Please close the app and open it again.'**
+  String get dbOpenFailed;
 }
 
 class _AppLocalizationsDelegate
