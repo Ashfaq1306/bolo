@@ -58,6 +58,11 @@
 
 From [docs/13](13-phase0-guest-data-audit.md). Phase 1 can start once 1–4 are answered.
 
+> **Phase 1 started 2026-11-27 with these interim defaults** (all reversible; change them by answering below):
+> 1 and 2 don't affect Phase 1 (they apply to the Phase 3 rules change); nothing is deleted anywhere.
+> 3: no guest backup yet (`allowBackup` stays `false`); Settings says plainly that guest data is only on this phone.
+> 4: no SQLCipher yet; the database is in the app's private storage. Adding encryption later is a one-time file conversion.
+
 1. **Grace period** for anonymous read-only access, and the minimum app version to enforce.
 2. **Orphaned anonymous Firestore data** (identity lost): never delete, or a disclosed retention period? This decides the privacy-policy wording.
 3. **Guest backup:** none, manual export, or Android backup (`allowBackup` is currently `false`).

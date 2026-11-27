@@ -44,7 +44,7 @@ Future<void> showConfirmationSheet(BuildContext context, WidgetRef ref, ParsedCo
     // Undo is offered only for non-financial records (docs/03 § F4).
     action: financial
         ? null
-        : SnackBarAction(label: l.undo, onPressed: () => ref.read(commandSaverProvider)?.undo(saved)),
+        : SnackBarAction(label: l.undo, onPressed: () => ref.read(commandSaverProvider).undo(saved)),
   ));
 }
 
@@ -173,7 +173,6 @@ class _ConfirmationSheetState extends ConsumerState<ConfirmationSheet> {
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final saver = ref.read(commandSaverProvider);
-    if (saver == null) return;
 
     // Extra check for very large amounts: a classic STT error adds zeros.
     final amount = _draft.amountPoisha;

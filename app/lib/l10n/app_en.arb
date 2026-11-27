@@ -377,5 +377,18 @@
   "voiceCheckHint": "If voice input doesn't work on this phone, run this and send the report to the Bolo team. It has no recordings or personal data.",
   "voiceCheckRun": "Run voice check",
   "voiceCheckCopy": "Copy report",
-  "voiceCheckCopied": "Report copied"
+  "voiceCheckCopied": "Report copied",
+  "guestLocalOnly": "Your data is saved only on this phone. If you uninstall the app or clear its data, it can't be recovered. Backup and sync with an account are coming in a later update.",
+  "migrationRunning": "Moving your data onto this phone…",
+  "migrationDone": "Your data is on this phone: {count} items moved.",
+  "@migrationDone": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "migrationCacheOnly": "Some items will finish moving when you're online.",
+  "migrationFailed": "Couldn't finish moving your earlier data. Bolo will try again; nothing was deleted.",
+  "dbOpenFailed": "Bolo couldn't open its data on this phone. Nothing was deleted. Please close the app and open it again."
 }

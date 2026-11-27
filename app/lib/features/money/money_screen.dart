@@ -149,6 +149,6 @@ class MoneyScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (ok == true) await ref.read(recordsRepositoryProvider)?.settleLedgerEntry(e.id);
+    if (ok == true) await ref.read(recordsRepositoryProvider).settleLedgerEntry(e.id);
   }
 }

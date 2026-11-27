@@ -10,6 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'core/dhaka_time.dart';
 import 'core/providers.dart';
+import 'data/bolo_database.dart';
+import 'data/device_identity.dart';
+import 'features/inbox/inbox_store.dart';
+import 'features/migration/guest_migration.dart';
 import 'features/reminders/reminder_scheduler.dart';
 import 'firebase_options.dart';
 
@@ -28,8 +32,9 @@ Future<void> main() async {
     FirebaseFunctions.instanceFor(region: 'asia-south1').useFunctionsEmulator(host, 5001);
   }
 
-  // Firestore's on-device cache is our offline database (docs/04 § 4.3).
-  // It is on by default on Android; we set it explicitly so it's obvious.
+  // The local Drift database is the source of truth (ADR-10). Firestore's
+  // cache still matters: the guest migration reads the old data from it, and
+  // accounts registered before Phase 2 still use Firestore.
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
@@ -43,10 +48,39 @@ Future<void> main() async {
   final scheduler = LocalReminderScheduler();
   await scheduler.init();
 
+  // Open the local database. Works offline from the very first launch.
+  final db = BoloDatabase.open();
+  final DeviceIdentity identity;
+  try {
+    identity = await DeviceIdentity.load(db);
+  } catch (e) {
+    // Never wipe the file: show a message and keep the data for recovery.
+    debugPrint('Database open failed: ${e.runtimeType}');
+    runApp(DatabaseErrorApp(locale: Locale(prefs.getString(LocaleNotifier.prefsKey) ?? 'bn')));
+    return;
+  }
+
+  // The signed-in Firebase user is restored from the phone (no network).
+  final initialUser = await FirebaseAuth.instance
+      .authStateChanges()
+      .first
+      .timeout(const Duration(seconds: 5), onTimeout: () => FirebaseAuth.instance.currentUser);
+
+  // First launch of this version: remember which anonymous uid owned the old
+  // Firestore guest data, before any new session could replace it.
+  await GuestMigration.rememberLegacyUser(
+    db,
+    anonymousUid: initialUser != null && initialUser.isAnonymous ? initialUser.uid : null,
+  );
+  await InboxStore(db, ownerScope: identity.guestScope).importLegacy(prefs);
+
   runApp(ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
       reminderSchedulerProvider.overrideWithValue(scheduler),
+      databaseProvider.overrideWithValue(db),
+      deviceIdentityProvider.overrideWithValue(identity),
+      initialUserProvider.overrideWithValue(initialUser),
     ],
     child: const BoloApp(),
   ));

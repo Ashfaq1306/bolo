@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-/// Data models for everything a user saves. Each class is immutable and
-/// converts to/from the Firestore map described in docs/05-database-schema.md.
+// Data models for everything a user saves. Plain, immutable Dart: no
+// storage types here. The local database (bolo_database.dart) and the
+// Firestore codec (firestore_codec.dart) convert to and from these.
 
 const int kSchemaVersion = 1;
 
@@ -47,9 +46,8 @@ int notificationIdFor(String docId) {
   return hash & 0x7fffffff;
 }
 
-DateTime? _ts(Object? v) => v is Timestamp ? v.toDate() : null;
-Timestamp? _toTs(DateTime? d) => d == null ? null : Timestamp.fromDate(d);
-T _enum<T extends Enum>(List<T> values, Object? v, T fallback) =>
+/// Reads an enum by its `name`, falling back for unknown or missing values.
+T enumByName<T extends Enum>(List<T> values, Object? v, T fallback) =>
     values.firstWhere((e) => e.name == v, orElse: () => fallback);
 
 class Reminder {
@@ -70,25 +68,6 @@ class Reminder {
   final RecordSource source;
 
   int get notificationId => notificationIdFor(id);
-
-  Map<String, Object?> toMap() => {
-        'title': title,
-        'remindAt': _toTs(remindAt),
-        'repeat': repeat.name,
-        'status': done ? 'done' : 'pending',
-        'notificationId': notificationId,
-        'source': source.name,
-        'schemaVersion': kSchemaVersion,
-      };
-
-  factory Reminder.fromMap(String id, Map<String, dynamic> m) => Reminder(
-        id: id,
-        title: m['title'] as String? ?? '',
-        remindAt: _ts(m['remindAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
-        repeat: _enum(ReminderRepeat.values, m['repeat'], ReminderRepeat.none),
-        done: m['status'] == 'done',
-        source: _enum(RecordSource.values, m['source'], RecordSource.manual),
-      );
 }
 
 class TaskItem {
@@ -113,29 +92,6 @@ class TaskItem {
   final RecordSource source;
 
   int get notificationId => notificationIdFor(id);
-
-  Map<String, Object?> toMap() => {
-        'title': title,
-        'dueAt': _toTs(dueAt),
-        'remindAt': _toTs(remindAt),
-        'notificationId': notificationId,
-        'priority': highPriority ? 'high' : 'normal',
-        'status': done ? 'done' : 'open',
-        'completedAt': _toTs(completedAt),
-        'source': source.name,
-        'schemaVersion': kSchemaVersion,
-      };
-
-  factory TaskItem.fromMap(String id, Map<String, dynamic> m) => TaskItem(
-        id: id,
-        title: m['title'] as String? ?? '',
-        dueAt: _ts(m['dueAt']),
-        remindAt: _ts(m['remindAt']),
-        highPriority: m['priority'] == 'high',
-        done: m['status'] == 'done',
-        completedAt: _ts(m['completedAt']),
-        source: _enum(RecordSource.values, m['source'], RecordSource.manual),
-      );
 }
 
 class Expense {
@@ -154,25 +110,6 @@ class Expense {
   final ExpenseCategory category;
   final String note;
   final RecordSource source;
-
-  Map<String, Object?> toMap() => {
-        'amountPoisha': amountPoisha,
-        'currency': 'BDT',
-        'category': category.wire,
-        'note': note,
-        'spentAt': _toTs(spentAt),
-        'source': source.name,
-        'schemaVersion': kSchemaVersion,
-      };
-
-  factory Expense.fromMap(String id, Map<String, dynamic> m) => Expense(
-        id: id,
-        amountPoisha: (m['amountPoisha'] as num?)?.toInt() ?? 0,
-        spentAt: _ts(m['spentAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
-        category: ExpenseCategory.fromWire(m['category'] as String?),
-        note: m['note'] as String? ?? '',
-        source: _enum(RecordSource.values, m['source'], RecordSource.manual),
-      );
 }
 
 class LedgerEntry {
@@ -199,30 +136,4 @@ class LedgerEntry {
   final String note;
   final RecordSource source;
   final DateTime? createdAt;
-
-  Map<String, Object?> toMap() => {
-        'direction': direction.name,
-        'person': person,
-        'amountPoisha': amountPoisha,
-        'currency': 'BDT',
-        'dueAt': _toTs(dueAt),
-        'status': settled ? 'settled' : 'open',
-        'settledAt': _toTs(settledAt),
-        'note': note,
-        'source': source.name,
-        'schemaVersion': kSchemaVersion,
-      };
-
-  factory LedgerEntry.fromMap(String id, Map<String, dynamic> m) => LedgerEntry(
-        id: id,
-        direction: _enum(LedgerDirection.values, m['direction'], LedgerDirection.receivable),
-        person: m['person'] as String? ?? '',
-        amountPoisha: (m['amountPoisha'] as num?)?.toInt() ?? 0,
-        dueAt: _ts(m['dueAt']),
-        settled: m['status'] == 'settled',
-        settledAt: _ts(m['settledAt']),
-        note: m['note'] as String? ?? '',
-        source: _enum(RecordSource.values, m['source'], RecordSource.manual),
-        createdAt: _ts(m['createdAt']),
-      );
 }

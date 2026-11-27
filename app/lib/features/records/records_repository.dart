@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
+import 'firestore_codec.dart';
 import 'models.dart';
 
 /// What the UI can do with a user's records. Screens depend on this
-/// interface only, so tests can use a fake and we could later swap Firestore
-/// for another local database without touching the UI (docs/04 § 4.3).
+/// interface only. Guests use [DriftRecordsRepository] (local-only, ADR-11);
+/// accounts registered before Phase 2 still use [FirestoreRecordsRepository]
+/// until registered sync ships (ADR-10).
 abstract class RecordsRepository {
   Stream<List<Reminder>> watchPendingReminders();
   Stream<List<TaskItem>> watchOpenTasks();
@@ -35,7 +37,8 @@ class Collections {
   static const ledger = 'ledger';
 }
 
-/// Firestore implementation. Firestore keeps an on-device cache, so every
+/// Legacy Firestore implementation, used only for registered (email) accounts
+/// until Phase 2 sync replaces it. Guests never write here. Firestore keeps an on-device cache, so every
 /// read works offline and every write is queued until the network is back.
 ///
 /// **Important offline detail:** the Future returned by `set()`/`update()`
@@ -79,14 +82,14 @@ class FirestoreRecordsRepository implements RecordsRepository {
   Stream<List<Reminder>> watchPendingReminders() => _col(Collections.reminders)
       .where('status', isEqualTo: 'pending')
       .snapshots()
-      .map((s) => s.docs.map((d) => Reminder.fromMap(d.id, d.data())).toList()
+      .map((s) => s.docs.map((d) => reminderFromFirestore(d.id, d.data())).toList()
         ..sort((a, b) => a.remindAt.compareTo(b.remindAt)));
 
   @override
   Stream<List<TaskItem>> watchOpenTasks() => _col(Collections.tasks)
       .where('status', isEqualTo: 'open')
       .snapshots()
-      .map((s) => s.docs.map((d) => TaskItem.fromMap(d.id, d.data())).toList()
+      .map((s) => s.docs.map((d) => taskFromFirestore(d.id, d.data())).toList()
         ..sort((a, b) {
           final ad = a.dueAt, bd = b.dueAt;
           if (ad == null && bd == null) return a.title.compareTo(b.title);
@@ -100,30 +103,30 @@ class FirestoreRecordsRepository implements RecordsRepository {
       .where('spentAt', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
       .orderBy('spentAt', descending: true)
       .snapshots()
-      .map((s) => s.docs.map((d) => Expense.fromMap(d.id, d.data())).toList());
+      .map((s) => s.docs.map((d) => expenseFromFirestore(d.id, d.data())).toList());
 
   @override
   Stream<List<LedgerEntry>> watchOpenLedger() => _col(Collections.ledger)
       .where('status', isEqualTo: 'open')
       .snapshots()
-      .map((s) => s.docs.map((d) => LedgerEntry.fromMap(d.id, d.data())).toList()
+      .map((s) => s.docs.map((d) => ledgerFromFirestore(d.id, d.data())).toList()
         ..sort((a, b) => a.person.toLowerCase().compareTo(b.person.toLowerCase())));
 
   @override
   Future<void> saveReminder(Reminder r, {bool isNew = true}) async =>
-      _write(Collections.reminders, r.id, r.toMap(), isNew);
+      _write(Collections.reminders, r.id, reminderToFirestore(r), isNew);
 
   @override
   Future<void> saveTask(TaskItem t, {bool isNew = true}) async =>
-      _write(Collections.tasks, t.id, t.toMap(), isNew);
+      _write(Collections.tasks, t.id, taskToFirestore(t), isNew);
 
   @override
   Future<void> saveExpense(Expense e, {bool isNew = true}) async =>
-      _write(Collections.expenses, e.id, e.toMap(), isNew);
+      _write(Collections.expenses, e.id, expenseToFirestore(e), isNew);
 
   @override
   Future<void> saveLedgerEntry(LedgerEntry e, {bool isNew = true}) async =>
-      _write(Collections.ledger, e.id, e.toMap(), isNew);
+      _write(Collections.ledger, e.id, ledgerToFirestore(e), isNew);
 
   @override
   Future<void> setReminderDone(String id, bool done) async =>

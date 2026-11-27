@@ -49,7 +49,7 @@ class TasksScreen extends ConsumerWidget {
                   value: r.done,
                   onChanged: (_) async {
                     await scheduler.cancel(r.notificationId);
-                    await repo?.setReminderDone(r.id, true);
+                    await repo.setReminderDone(r.id, true);
                   },
                 ),
                 title: Text(r.title),
@@ -63,7 +63,7 @@ class TasksScreen extends ConsumerWidget {
                   icon: const Icon(Icons.delete_outline_rounded),
                   onPressed: () async {
                     await scheduler.cancel(r.notificationId);
-                    await repo?.delete(Collections.reminders, r.id);
+                    await repo.delete(Collections.reminders, r.id);
                   },
                 ),
               ),
@@ -83,7 +83,7 @@ class TasksScreen extends ConsumerWidget {
                   value: t.done,
                   onChanged: (_) async {
                     await scheduler.cancel(t.notificationId);
-                    await repo?.setTaskDone(t.id, true);
+                    await repo.setTaskDone(t.id, true);
                   },
                 ),
                 title: Text(t.title),
@@ -98,7 +98,7 @@ class TasksScreen extends ConsumerWidget {
                   icon: const Icon(Icons.delete_outline_rounded),
                   onPressed: () async {
                     await scheduler.cancel(t.notificationId);
-                    await repo?.delete(Collections.tasks, t.id);
+                    await repo.delete(Collections.tasks, t.id);
                   },
                 ),
               ),
