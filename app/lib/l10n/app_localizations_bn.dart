@@ -640,4 +640,44 @@ class AppLocalizationsBn extends AppLocalizations {
   String assistantCanDo(String name) {
     return 'বলে দেখুন: \"$name, আম্মুকে ফোন দাও\", \"আরিজিত সিং এর গান বাজাও\", \"YouTube খোলো\", \"১০ মিনিট পরে পানি খেতে মনে করিয়ে দিও\"।';
   }
+
+  @override
+  String get micPermission =>
+      'মাইক্রোফোনের অনুমতি লাগবে। সেটিংস › অ্যাপ › বলো › অনুমতি থেকে চালু করুন।';
+
+  @override
+  String get micBusy =>
+      'মাইক্রোফোন ব্যস্ত বা কোনো শব্দ পাচ্ছে না। মাইক ব্যবহার করছে এমন অ্যাপ বন্ধ করুন (বা ব্লুটুথ বিচ্ছিন্ন করুন), তারপর আবার চেষ্টা করুন।';
+
+  @override
+  String get speechLanguageUnavailable =>
+      'এই ফোনের কথা চেনার সেবা এই ভাষা বোঝে না। Google-এর স্পিচ সেবা ইনস্টল বা আপডেট করুন, অথবা সেটিংসে কথা বলার ভাষা বদলান।';
+
+  @override
+  String get speechNetwork =>
+      'এই ফোনে কথা চিনতে ইন্টারনেট লাগে। সংযোগ দেখুন, অথবা লিখে দিন।';
+
+  @override
+  String get speechServiceError =>
+      'ফোনের কথা চেনার সেবায় সমস্যা হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get notRecognized =>
+      'শুনেছি, কিন্তু কথাগুলো বুঝতে পারিনি। আবার বলবেন?';
+
+  @override
+  String get voiceCheck => 'ভয়েস পরীক্ষা';
+
+  @override
+  String get voiceCheckHint =>
+      'এই ফোনে কথা বলে কাজ না হলে এটি চালান এবং রিপোর্টটি বলো টিমকে পাঠান। এতে কোনো রেকর্ডিং বা ব্যক্তিগত তথ্য নেই।';
+
+  @override
+  String get voiceCheckRun => 'ভয়েস পরীক্ষা চালান';
+
+  @override
+  String get voiceCheckCopy => 'রিপোর্ট কপি করুন';
+
+  @override
+  String get voiceCheckCopied => 'রিপোর্ট কপি হয়েছে';
 }

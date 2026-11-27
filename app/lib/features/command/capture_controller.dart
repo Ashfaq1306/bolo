@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../assistant/assistant_settings.dart';
 import '../inbox/inbox_store.dart';
 import '../records/models.dart';
 import '../voice/speech_service.dart';
@@ -11,7 +12,34 @@ import 'parsed_command.dart';
 
 enum CapturePhase { idle, listening, thinking }
 
-enum CaptureMessage { none, micUnavailable, heardNothing, offlineSaved, quotaExceeded, serverError, tooLong, notSignedIn }
+enum CaptureMessage {
+  none,
+  micUnavailable,
+  micPermission,
+  micBusy,
+  speechLanguageUnavailable,
+  speechNetwork,
+  speechServiceError,
+  heardNothing,
+  notRecognized,
+  offlineSaved,
+  quotaExceeded,
+  serverError,
+  tooLong,
+  notSignedIn,
+}
+
+/// The message to show for a failed listening attempt.
+CaptureMessage messageForSpeechFailure(SpeechFailure? f) => switch (f) {
+      SpeechFailure.permissionDenied => CaptureMessage.micPermission,
+      SpeechFailure.recognizerUnavailable => CaptureMessage.micUnavailable,
+      SpeechFailure.languageUnavailable => CaptureMessage.speechLanguageUnavailable,
+      SpeechFailure.network => CaptureMessage.speechNetwork,
+      SpeechFailure.micBusy => CaptureMessage.micBusy,
+      SpeechFailure.notRecognized => CaptureMessage.notRecognized,
+      SpeechFailure.serviceError || SpeechFailure.unknown => CaptureMessage.speechServiceError,
+      SpeechFailure.noSpeech || null => CaptureMessage.heardNothing,
+    };
 
 class CaptureState {
   const CaptureState({
@@ -67,19 +95,34 @@ class CaptureController extends Notifier<CaptureState> {
     if (state.phase == CapturePhase.thinking) return;
 
     if (!await _speech.init()) {
-      state = state.copyWith(message: CaptureMessage.micUnavailable);
+      state = state.copyWith(message: messageForSpeechFailure(_speech.initFailure ?? SpeechFailure.recognizerUnavailable));
       return;
     }
     _handledFinal = false;
     _sub ??= _speech.states.listen(_onSpeech);
     state = const CaptureState(phase: CapturePhase.listening);
+    await _releaseWakeMic();
+    if (state.phase != CapturePhase.listening) return; // cancelled meanwhile
     await _speech.start(localeId: ref.read(speechLocaleProvider));
+  }
+
+  /// The hands-free wake word listener holds the microphone. Android gives a
+  /// second recorder silence or ERROR_AUDIO, which used to show up as
+  /// "I didn't hear anything". Pause it and wait until it has let go.
+  Future<void> _releaseWakeMic() async {
+    final device = ref.read(deviceBridgeProvider);
+    if (!await device.wakeMicInUse()) return;
+    await device.wakePause();
+    for (var i = 0; i < 20 && await device.wakeMicInUse(); i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
   }
 
   void _onSpeech(SpeechState s) {
     if (state.phase != CapturePhase.listening) return;
-    if (s.error != null && s.text.isEmpty) {
-      state = state.copyWith(phase: CapturePhase.idle, level: 0, message: CaptureMessage.heardNothing);
+    if ((s.error != null || s.failure != null) && s.text.isEmpty) {
+      _handledFinal = true;
+      state = state.copyWith(phase: CapturePhase.idle, level: 0, message: messageForSpeechFailure(s.failure));
       return;
     }
     state = state.copyWith(transcript: s.text, level: s.level);

@@ -12,6 +12,7 @@ import '../command/capture_controller.dart';
 import '../command/confirmation_sheet.dart';
 import '../records/models.dart';
 import '../update/update_prompt.dart';
+import '../voice/voice_check_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -87,6 +88,8 @@ class SettingsScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         const AssistantSettingsCard(),
+        const SizedBox(height: 12),
+        const VoiceCheckCard(),
         const SizedBox(height: 12),
         DepthCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

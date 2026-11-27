@@ -29,6 +29,12 @@ abstract class DeviceBridge {
   Future<void> wakePause();
   Future<void> wakeResume();
   Future<bool> wakeRunning();
+
+  /// Whether the wake word listener is recording from the mic right now.
+  Future<bool> wakeMicInUse();
+
+  /// The phone's speech recognition setup, for the Voice check screen.
+  Future<Map<String, Object?>> speechEnvironment();
   Future<bool> wakeKnowsName(String name);
 
   Future<bool> canAppearOverApps();
@@ -111,6 +117,12 @@ class ChannelDeviceBridge implements DeviceBridge {
   @override
   Future<bool> wakeRunning() async => (await _call<Map<Object?, Object?>>('wakeStatus'))?['running'] == true;
   @override
+  Future<bool> wakeMicInUse() async => (await _call<Map<Object?, Object?>>('wakeStatus'))?['listening'] == true;
+  @override
+  Future<Map<String, Object?>> speechEnvironment() async =>
+      (await _call<Map<Object?, Object?>>('speechEnvironment'))?.map((k, v) => MapEntry('$k', v)) ?? const {};
+
+  @override
   Future<bool> wakeKnowsName(String name) async => await _call<bool>('wakeKnowsName', {'name': name}) ?? false;
 
   @override
@@ -166,11 +178,19 @@ class FakeDeviceBridge implements DeviceBridge {
   @override
   Future<void> wakeStop() async => calls.add('wakeStop');
   @override
-  Future<void> wakePause() async => calls.add('wakePause');
+  Future<void> wakePause() async {
+    calls.add('wakePause');
+    wakeListening = false;
+  }
   @override
   Future<void> wakeResume() async => calls.add('wakeResume');
   @override
-  Future<bool> wakeRunning() async => false;
+  Future<bool> wakeRunning() async => wakeListening;
+  bool wakeListening = false;
+  @override
+  Future<bool> wakeMicInUse() async => wakeListening;
+  @override
+  Future<Map<String, Object?>> speechEnvironment() async => const {};
   @override
   Future<bool> wakeKnowsName(String name) async => name != 'tuntuni';
   @override

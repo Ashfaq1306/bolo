@@ -644,4 +644,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String assistantCanDo(String name) {
     return 'Try: \"$name, call Ammu\", \"play Arijit Singh\", \"open YouTube\", \"remind me in 10 minutes to drink water\".';
   }
+
+  @override
+  String get micPermission =>
+      'Bolo needs microphone permission. Turn it on in Settings › Apps › Bolo › Permissions.';
+
+  @override
+  String get micBusy =>
+      'The microphone is busy or silent. Close other apps using the mic (or disconnect Bluetooth) and try again.';
+
+  @override
+  String get speechLanguageUnavailable =>
+      'This phone\'s speech recognizer can\'t understand this language. Install or update Google\'s speech service, or change the speech language in Settings.';
+
+  @override
+  String get speechNetwork =>
+      'Speech recognition needs the internet on this phone. Check your connection, or type instead.';
+
+  @override
+  String get speechServiceError =>
+      'The phone\'s speech service had a problem. Please try again.';
+
+  @override
+  String get notRecognized =>
+      'I heard you but couldn\'t make out the words. Please try again.';
+
+  @override
+  String get voiceCheck => 'Voice check';
+
+  @override
+  String get voiceCheckHint =>
+      'If voice input doesn\'t work on this phone, run this and send the report to the Bolo team. It has no recordings or personal data.';
+
+  @override
+  String get voiceCheckRun => 'Run voice check';
+
+  @override
+  String get voiceCheckCopy => 'Copy report';
+
+  @override
+  String get voiceCheckCopied => 'Report copied';
 }

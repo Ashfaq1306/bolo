@@ -1225,6 +1225,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try: \"{name}, call Ammu\", \"play Arijit Singh\", \"open YouTube\", \"remind me in 10 minutes to drink water\".'**
   String assistantCanDo(String name);
+
+  /// No description provided for @micPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Bolo needs microphone permission. Turn it on in Settings › Apps › Bolo › Permissions.'**
+  String get micPermission;
+
+  /// No description provided for @micBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'The microphone is busy or silent. Close other apps using the mic (or disconnect Bluetooth) and try again.'**
+  String get micBusy;
+
+  /// No description provided for @speechLanguageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone\'s speech recognizer can\'t understand this language. Install or update Google\'s speech service, or change the speech language in Settings.'**
+  String get speechLanguageUnavailable;
+
+  /// No description provided for @speechNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition needs the internet on this phone. Check your connection, or type instead.'**
+  String get speechNetwork;
+
+  /// No description provided for @speechServiceError.
+  ///
+  /// In en, this message translates to:
+  /// **'The phone\'s speech service had a problem. Please try again.'**
+  String get speechServiceError;
+
+  /// No description provided for @notRecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'I heard you but couldn\'t make out the words. Please try again.'**
+  String get notRecognized;
+
+  /// No description provided for @voiceCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice check'**
+  String get voiceCheck;
+
+  /// No description provided for @voiceCheckHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If voice input doesn\'t work on this phone, run this and send the report to the Bolo team. It has no recordings or personal data.'**
+  String get voiceCheckHint;
+
+  /// No description provided for @voiceCheckRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run voice check'**
+  String get voiceCheckRun;
+
+  /// No description provided for @voiceCheckCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy report'**
+  String get voiceCheckCopy;
+
+  /// No description provided for @voiceCheckCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Report copied'**
+  String get voiceCheckCopied;
 }
 
 class _AppLocalizationsDelegate

@@ -12,6 +12,10 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.speech.RecognitionService
+import android.speech.SpeechRecognizer
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
@@ -151,6 +155,7 @@ class MainActivity : FlutterActivity() {
                     if (WakeWordService.running) startService(WakeWordService.intent(this, WakeWordService.ACTION_RESUME))
                     result.success(null)
                 }
+                "speechEnvironment" -> result.success(speechEnvironment())
                 "wakeStatus" -> result.success(mapOf("running" to WakeWordService.running, "listening" to WakeWordService.listening))
                 "wakeKnowsName" -> {
                     val name = call.argument<String>("name") ?: ""
@@ -301,5 +306,54 @@ class MainActivity : FlutterActivity() {
         val launch = pm.getLaunchIntentForPackage(pkg) ?: return null
         startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         return label
+    }
+
+    // ---------------- voice check (diagnostics) ----------------
+
+    /**
+     * Facts about the phone's speech recognition setup for the Voice check
+     * screen. Shown only on the phone; nothing here is sent anywhere, and it
+     * contains no audio or speech.
+     */
+    private fun speechEnvironment(): Map<String, Any?> {
+        val pm = packageManager
+        fun version(pkg: String): String? = try {
+            val info = pm.getPackageInfo(pkg, 0)
+            val enabled = info.applicationInfo?.enabled != false
+            (info.versionName ?: "?") + if (enabled) "" else " (disabled)"
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
+        val services = pm.queryIntentServices(Intent(RecognitionService.SERVICE_INTERFACE), 0)
+            .mapNotNull { it.serviceInfo?.packageName }
+            .distinct()
+        val inputs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getSystemService(AudioManager::class.java).getDevices(AudioManager.GET_DEVICES_INPUTS).map {
+                when (it.type) {
+                    AudioDeviceInfo.TYPE_BUILTIN_MIC -> "builtin_mic"
+                    AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> "bluetooth"
+                    AudioDeviceInfo.TYPE_WIRED_HEADSET -> "wired_headset"
+                    AudioDeviceInfo.TYPE_USB_DEVICE, AudioDeviceInfo.TYPE_USB_HEADSET -> "usb"
+                    else -> "type_${it.type}"
+                }
+            }.distinct()
+        } else emptyList()
+        return mapOf(
+            "manufacturer" to Build.MANUFACTURER,
+            "model" to Build.MODEL,
+            "android" to Build.VERSION.RELEASE,
+            "sdk" to Build.VERSION.SDK_INT,
+            // The recognizer Android uses by default (what speech_to_text gets).
+            "defaultRecognizer" to Settings.Secure.getString(contentResolver, "voice_recognition_service"),
+            "recognizers" to services,
+            "recognitionAvailable" to SpeechRecognizer.isRecognitionAvailable(this),
+            "onDeviceAvailable" to (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                SpeechRecognizer.isOnDeviceRecognitionAvailable(this)),
+            "googleApp" to version("com.google.android.googlequicksearchbox"),
+            "speechServices" to version("com.google.android.tts"),
+            "playServices" to version("com.google.android.gms"),
+            "micInputs" to inputs,
+            "wakeWordListening" to WakeWordService.listening,
+        )
     }
 }

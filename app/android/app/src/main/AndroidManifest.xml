@@ -110,6 +110,10 @@
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>
+        <!-- Voice check: report the versions of the Google speech components. -->
+        <package android:name="com.google.android.googlequicksearchbox" />
+        <package android:name="com.google.android.tts" />
+        <package android:name="com.google.android.gms" />
         <!-- Lets speech_to_text find the system speech recognizer (Android 11+). -->
         <intent>
             <action android:name="android.speech.RecognitionService" />

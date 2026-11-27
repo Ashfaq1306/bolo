@@ -366,5 +366,16 @@
         "type": "String"
       }
     }
-  }
+  },
+  "micPermission": "Bolo needs microphone permission. Turn it on in Settings › Apps › Bolo › Permissions.",
+  "micBusy": "The microphone is busy or silent. Close other apps using the mic (or disconnect Bluetooth) and try again.",
+  "speechLanguageUnavailable": "This phone's speech recognizer can't understand this language. Install or update Google's speech service, or change the speech language in Settings.",
+  "speechNetwork": "Speech recognition needs the internet on this phone. Check your connection, or type instead.",
+  "speechServiceError": "The phone's speech service had a problem. Please try again.",
+  "notRecognized": "I heard you but couldn't make out the words. Please try again.",
+  "voiceCheck": "Voice check",
+  "voiceCheckHint": "If voice input doesn't work on this phone, run this and send the report to the Bolo team. It has no recordings or personal data.",
+  "voiceCheckRun": "Run voice check",
+  "voiceCheckCopy": "Copy report",
+  "voiceCheckCopied": "Report copied"
 }
