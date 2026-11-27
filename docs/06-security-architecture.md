@@ -24,7 +24,7 @@
 ## 6.3 Controls
 
 ### Authentication
-- Every user has a Firebase Auth UID from the first launch (anonymous), so no data is ever written without an owner.
+- Every user has a Firebase Auth UID from the first launch (anonymous), so no data is ever written without an owner. **Superseded (2026-11-27) by [ADR-11](adr/0011-guest-data-local-only.md):** guest data is local-only; anonymous users will lose access to personal records once the migration has shipped (docs/13 § 7).
 - Email/password linking keeps the same UID.
 - The ID tokens the Firebase SDK sends are verified automatically by Firestore and by callable functions.
 

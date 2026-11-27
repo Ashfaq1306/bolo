@@ -12,7 +12,7 @@ Each journey lists the **happy path** first, followed by the **edge cases** the 
 4. Home shows the 3D orb, a greeting for the current Dhaka time (শুভ সকাল / শুভ সন্ধ্যা), and the Today summary.
 
 Edge cases
-- **No internet on first launch:** anonymous sign-in fails, so Bolo shows "offline, your data will be saved on this phone" and retries later. (Firestore needs a signed-in user before it can write; see the risk register.)
+- **No internet on first launch** *(not met by the current code: the app stops at a sign-in error. Fixed by Phase 1, see [ADR-11](adr/0011-guest-data-local-only.md))*: anonymous sign-in fails, so Bolo shows "offline, your data will be saved on this phone" and retries later. (Firestore needs a signed-in user before it can write; see the risk register.)
 - **Microphone denied:** typed input stays fully usable, and a banner explains how to enable the mic in Settings.
 
 ## J2: Voice reminder (Bangla)

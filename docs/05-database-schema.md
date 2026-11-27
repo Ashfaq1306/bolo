@@ -103,6 +103,8 @@ When lists grow (e.g. a "done" history), add `orderBy` + `limit` and the composi
 
 ## 5.4 On-device storage (not Firestore)
 
+> **Target changed (2026-11-27):** per [ADR-10](adr/0010-drift-local-first.md) and [ADR-11](adr/0011-guest-data-local-only.md), personal records (and the inbox) move to a local Drift/SQLite database; guests never write to Firestore. The table below describes the current code. Target schema: [docs/13 § 9](13-phase0-guest-data-audit.md#9-drift-target).
+
 | Data | Store | Why |
 |---|---|---|
 | Firestore cache | Firestore SDK (SQLite internally) | offline reads/writes |
@@ -114,5 +116,7 @@ When lists grow (e.g. a "done" history), add `orderBy` + `limit` and the composi
 A record is about 300–500 bytes. A heavy user with 20 records/day for a year produces about 7,300 docs, or around 3.5 MB. That is far below Firestore's free tier for the first thousands of users. Reads are the cost to watch, not storage; see [09](09-cost-control.md).
 
 ## 5.6 Migration strategy
+
+> The one-time move of existing Firestore records into Drift is designed in [docs/13 § 11](13-phase0-guest-data-audit.md#11-guest-migration-six-scenarios) (journaled, idempotent, never deletes the source).
 
 `schemaVersion` on every document means the app can read v1 and v2 side by side during a migration. Changes should only add fields; renaming or deleting fields requires a one-off migration function.

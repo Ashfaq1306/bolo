@@ -64,10 +64,12 @@ The release key lives **outside git** (`app/android/key.properties` points to it
 | 10 | [Milestones](docs/10-milestones.md) |
 | 11 | [Risks & open decisions](docs/11-risks-and-open-decisions.md) |
 | 12 | [AI accuracy & evaluation](docs/12-ai-accuracy.md) |
+| 13 | [Phase 0 audit: guest data & migration design](docs/13-phase0-guest-data-audit.md) |
+| ADR | [Architecture decision records (ADR-10+)](docs/adr/README.md) |
 
 ## Getting started (developers)
 
-**Prerequisites:** Flutter 3.47+, Node.js 22, Firebase CLI, Java 21 (for the emulators; Android Studio's bundled JBR works), and an Android emulator or phone.
+**Prerequisites:** Flutter **3.47.7** (the version CI pins; newer versions need build-file upgrades, see docs/11 R23), Node.js 22, Firebase CLI, Java 21 (for the emulators; Android Studio's bundled JBR works), and an Android emulator or phone.
 
 ```bash
 # 1. Backend: install, build, run the Firebase emulators (free, local, mock AI)

@@ -124,6 +124,7 @@ Every field on the card is editable inline: title, amount, person, date, time, c
 
 - **Decision (MVP):** Cloud Firestore with its **built-in offline persistence** serves as the local database and sync engine. Reads are served from the on-device cache when offline, and writes are queued and sent when the connection returns.
 - The Inbox (unparsed offline captures) is stored locally with `shared_preferences`, because it must not be uploaded until the user chooses to.
+- **Update (2026-11-27):** the replacement is now decided, see [ADR-10](adr/0010-drift-local-first.md).
 - Everything goes through repository interfaces, so the storage can later be replaced by a dedicated local DB (e.g. Drift/SQLite) with a custom sync engine without touching the UI. See [04 § Why Firestore offline instead of a separate local DB](04-system-architecture.md#why-firestore-offline-instead-of-a-separate-local-db).
 
 ## F12: Bangla-first UI and accessibility

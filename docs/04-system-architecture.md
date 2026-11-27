@@ -59,6 +59,8 @@ Latency budget (p50, 4G): STT end-of-speech ~1.0 s, function cold start 0–1.5 
 
 ## 4.3 Why Firestore offline instead of a separate local DB
 
+> **Superseded (2026-11-27) by [ADR-10](adr/0010-drift-local-first.md):** Drift/SQLite is the local source of truth, with explicit Firestore sync for registered users only. This section is kept as the historical reasoning. See [docs/13](13-phase0-guest-data-audit.md).
+
 The brief suggested "a local database". For the MVP, the recommendation is to **use Firestore's built-in offline persistence as that local database** instead of adding SQLite/Drift with a hand-written sync layer:
 
 | | Firestore offline cache (chosen) | SQLite/Drift + custom sync |
@@ -100,6 +102,8 @@ Data sources (Firestore, Functions, speech_to_text, notifications) ← "how"
 
 ## 4.6 Environments
 
+> **Corrected (2026-11-27) by [ADR-12](adr/0012-firebase-environments.md):** `bolo-bd` is the **development** project. Production (`bolo-prod`) is deferred to M6. The table below is historical.
+
 | Env | Firebase | AI | Who |
 |---|---|---|---|
 | Local | Firebase **Emulator Suite** (Auth, Firestore, Functions) | Real API with a dev key, or a `MOCK_AI=true` stub returning canned JSON | Developers |
@@ -115,8 +119,9 @@ A separate `bolo-dev` project is recommended once there are real users, so that 
 | ADR-2 | Platform STT via `speech_to_text` for the MVP | Google Cloud STT, Whisper-style models | Zero cost, no audio handling. Must be validated by the evaluation in [08](08-stt-evaluation-plan.md). |
 | ADR-3 | Claude Haiku 5.5 with structured outputs via Cloud Functions | Rule-based only, other LLMs | Good with Bangla and code-mixed text. Schema-constrained JSON. Very low per-token price. |
 | ADR-4 | AI proposes, user confirms, client writes | AI writes directly | Safety for financial data. The user stays in control. |
-| ADR-5 | Firestore offline persistence as the local DB | Drift + custom sync | Much less code and fewer bugs. Reversible thanks to repositories. |
+| ADR-5 | ~~Firestore offline persistence as the local DB~~ **Superseded by [ADR-10](adr/0010-drift-local-first.md)** | Drift + custom sync | Much less code and fewer bugs. Reversible thanks to repositories. |
 | ADR-6 | Local notifications for reminders | FCM push from the server | Work offline, no server cost, simpler. |
-| ADR-7 | Anonymous auth, then email linking | Mandatory signup | Zero-friction onboarding while keeping per-user isolation from the first second. |
+| ADR-7 | Anonymous auth, then email linking. **Data ownership superseded by [ADR-11](adr/0011-guest-data-local-only.md)** (guest data is local-only) | Mandatory signup | Zero-friction onboarding while keeping per-user isolation from the first second. |
 | ADR-8 | Money as integer poisha | double | Exact arithmetic. |
 | ADR-9 | "3D" = a GPU fragment-shader orb plus depth/parallax UI | Full 3D engine / models | Runs on low-end phones, has a small APK impact, and an accessible fallback. |
+| ADR-10..12 | See [docs/adr](adr/README.md) | | |

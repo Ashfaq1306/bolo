@@ -13,6 +13,8 @@ These estimates assume two part-time student developers (about 10–15 h/week ea
 | M6 | Hardening: App Check, delete data, privacy, beta release | 2 weeks | ⏳ |
 | M7 | Closed beta (20–50 users) and STT/AI evaluation run | 3–4 weeks | ⏳ |
 
+> **Added 2026-11-27.** Shipped outside this plan in v1.1: robot face, voice replies, hands-free wake word (Vosk), calls / music / open apps, receipt scan, calendar intent, Remote Config update prompt, signed APK releases, Voice check diagnostics. The Phase 0 audit ([docs/13](13-phase0-guest-data-audit.md)) adds Phases 1–4 below, which come **before** M6. M2's "STT test screen" is partly covered by Settings → Voice check.
+
 ---
 
 ### M0: Setup and foundations
@@ -54,6 +56,18 @@ These estimates assume two part-time student developers (about 10–15 h/week ea
 - **DoD:** the metrics are measured, and a go/no-go decision is made for an open beta.
 
 ---
+
+## Phases after the Phase 0 audit
+
+Proposed by [docs/13](13-phase0-guest-data-audit.md); each phase needs explicit founder approval before it starts. Cloud Functions and Blaze stay in M6.
+
+| Phase | Scope | Exit criteria | Size |
+|---|---|---|---|
+| 0 | Audit and migration design | ✅ done (docs/13, ADR-10..12); decisions in docs/11 § 11.4 pending | – |
+| 1 Data foundation | Drift DB; device identity; offline first launch; `DriftRecordsRepository`; Firestore-free models; inbox into Drift; save `legacy_anon_uid`; journaled migration (scenarios A–C); guests stop writing to Firestore | Airplane-mode first launch works; migration tests pass; all existing tests pass | L (≈ 3–4 weeks part-time) |
+| 2 Registered sync | Outbox push/pull, tombstones, conflict UI; sign in to an existing account with the keep/import/separate choice; Google sign-in | Two-device tests pass; no duplicates after interrupted retries | L |
+| 3 Security & reliability | Rules: anonymous read-only, then none; minimum app version; App Check; delete/export; sync monitoring; toolchain upgrade | Rules tests for every case; staged rollout | M |
+| 4 Assistant foundation | Unified voice + chat, tool registry, context, user-controlled memory; AI function deploy (M6, needs Blaze approval) | Separate approval | L |
 
 ## How to work as a team (recommended)
 
